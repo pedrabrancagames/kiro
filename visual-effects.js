@@ -172,65 +172,84 @@ class VisualEffectsSystem {
     }
 
     /**
-     * Cria efeito de celebração com partículas
+     * Cria efeito de celebração com partículas DOM
      */
     showCelebrationEffect(x = null, y = null, type = 'ghost_captured') {
         // Usar centro da tela se não especificado
         if (x === null) x = window.innerWidth / 2;
         if (y === null) y = window.innerHeight / 2;
 
-        console.log('🎉 showCelebrationEffect chamado:', { x, y, type });
+        console.log('🎉 showCelebrationEffect chamado (DOM):', { x, y, type });
 
-        const configs = {
-            ghost_captured: {
-                count: 50,
-                colors: ['#92F428', '#4CAF50', '#8BC34A', '#CDDC39'],
-                size: { min: 3, max: 8 },
-                speed: { min: 2, max: 6 },
-                life: { min: 1000, max: 2000 },
-                gravity: 0.1,
-                spread: 360
-            },
-            ecto1_unlocked: {
-                count: 80,
-                colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
-                size: { min: 4, max: 12 },
-                speed: { min: 3, max: 8 },
-                life: { min: 1500, max: 3000 },
-                gravity: 0.05,
-                spread: 360
-            },
-            inventory_full: {
-                count: 30,
-                colors: ['#FF9800', '#FF5722', '#F44336'],
-                size: { min: 2, max: 6 },
-                speed: { min: 1, max: 4 },
-                life: { min: 800, max: 1500 },
-                gravity: 0.15,
-                spread: 180
-            }
+        // Limpar partículas canvas antigas para evitar spam de logs
+        this.clearCanvasParticles();
+
+        // Criar efeito DOM - mais eficiente e visível
+        this.createDOMCelebration(x, y, type);
+    }
+
+    /**
+     * Cria efeito de celebração usando elementos DOM
+     */
+    createDOMCelebration(x, y, type) {
+        console.log('🎨 Criando celebração DOM em:', x, y);
+
+        const colors = {
+            ghost_captured: ['#92F428', '#4CAF50', '#8BC34A', '#CDDC39'],
+            ecto1_unlocked: ['#FFD700', '#FFA500', '#FF6347', '#FF4500'],
+            inventory_full: ['#FF9800', '#FF5722', '#F44336']
         };
 
-        const config = configs[type] || configs.ghost_captured;
-        console.log('🎨 Config selecionada:', config);
-        
-        // Criar partículas
-        const particlesBefore = this.particles.length;
-        for (let i = 0; i < config.count; i++) {
-            const particle = new CelebrationParticle(x, y, config);
-            this.particles.push(particle);
+        const particleColors = colors[type] || colors.ghost_captured;
+        const particleCount = type === 'ecto1_unlocked' ? 20 : 15;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'dom-particle';
+            
+            const color = particleColors[Math.floor(Math.random() * particleColors.length)];
+            const size = Math.random() * 8 + 4;
+            const angle = (Math.PI * 2 * i) / particleCount;
+            const distance = Math.random() * 100 + 50;
+            
+            particle.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: ${size}px;
+                height: ${size}px;
+                background: ${color};
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 99999;
+                box-shadow: 0 0 10px ${color};
+                border: 1px solid white;
+            `;
+
+            document.body.appendChild(particle);
+
+            // Animar partícula
+            const endX = x + Math.cos(angle) * distance;
+            const endY = y + Math.sin(angle) * distance + Math.random() * 100;
+
+            particle.animate([
+                { 
+                    transform: 'translate(0, 0) scale(1)', 
+                    opacity: 1 
+                },
+                { 
+                    transform: `translate(${endX - x}px, ${endY - y}px) scale(0)`, 
+                    opacity: 0 
+                }
+            ], {
+                duration: 1500 + Math.random() * 1000,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            }).onfinish = () => {
+                particle.remove();
+            };
         }
-        console.log('✨ Partículas criadas:', this.particles.length - particlesBefore, 'Total:', this.particles.length);
 
-        this.startAnimation();
-        console.log('🎬 Animação iniciada. isActive:', this.isActive);
-
-        // Parar animação automaticamente após um tempo
-        setTimeout(() => {
-            if (this.particles.length === 0) {
-                this.stopAnimation();
-            }
-        }, Math.max(...config.life.map ? [config.life.min, config.life.max] : [config.life]) + 500);
+        console.log('✨ Criadas', particleCount, 'partículas DOM');
     }
 
     /**
@@ -241,13 +260,67 @@ class VisualEffectsSystem {
         if (sourceX === null) sourceX = window.innerWidth / 2;
         if (sourceY === null) sourceY = window.innerHeight * 0.8;
 
-        // Criar partículas que se movem do fantasma para a proton pack
-        for (let i = 0; i < 30; i++) {
-            const particle = new SuctionParticle(targetX, targetY, sourceX, sourceY);
-            this.particles.push(particle);
+        console.log('🌪️ Criando efeito de sucção DOM:', { targetX, targetY, sourceX, sourceY });
+
+        // Limpar partículas canvas antigas
+        this.clearCanvasParticles();
+
+        // Criar efeito DOM - mais eficiente e visível
+        this.createDOMSuction(targetX, targetY, sourceX, sourceY);
+    }
+
+    /**
+     * Cria efeito de sucção usando elementos DOM
+     */
+    createDOMSuction(startX, startY, endX, endY) {
+        const particleCount = 15;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'dom-suction-particle';
+            
+            const size = Math.random() * 6 + 3;
+            const offsetX = (Math.random() - 0.5) * 40;
+            const offsetY = (Math.random() - 0.5) * 40;
+            
+            particle.style.cssText = `
+                position: fixed;
+                left: ${startX + offsetX}px;
+                top: ${startY + offsetY}px;
+                width: ${size}px;
+                height: ${size}px;
+                background: #92F428;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 99999;
+                box-shadow: 0 0 8px #92F428;
+            `;
+
+            document.body.appendChild(particle);
+
+            // Animar sucção
+            particle.animate([
+                { 
+                    transform: 'translate(0, 0) scale(1)', 
+                    opacity: 1 
+                },
+                { 
+                    transform: `translate(${endX - startX - offsetX}px, ${endY - startY - offsetY}px) scale(0.2)`, 
+                    opacity: 0.8 
+                },
+                { 
+                    transform: `translate(${endX - startX - offsetX}px, ${endY - startY - offsetY}px) scale(0)`, 
+                    opacity: 0 
+                }
+            ], {
+                duration: 800 + Math.random() * 400,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            }).onfinish = () => {
+                particle.remove();
+            };
         }
 
-        this.startAnimation();
+        console.log('🌪️ Criadas', particleCount, 'partículas de sucção DOM');
     }
 
     /**
@@ -351,77 +424,176 @@ class VisualEffectsSystem {
     }
 
     /**
-     * Teste de visibilidade - cria partículas bem visíveis
+     * Limpa apenas as partículas canvas
      */
-    testVisibility() {
-        console.log('🧪 Testando visibilidade das partículas...');
-        
-        // Adicionar fundo temporário ao canvas para teste
-        this.canvas.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-        
-        // Criar partículas grandes e coloridas
-        for (let i = 0; i < 10; i++) {
-            const particle = {
-                x: 50 + i * 30,
-                y: 100,
-                size: 20,
-                color: '#FF0000', // Vermelho bem visível
-                life: 5000,
-                maxLife: 5000,
-                rotation: 0,
-                render: function(ctx) {
-                    ctx.save();
-                    ctx.fillStyle = this.color;
-                    ctx.strokeStyle = '#FFFFFF';
-                    ctx.lineWidth = 3;
-                    
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    // Adicionar texto para identificar
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.font = '12px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(i.toString(), this.x, this.y + 4);
-                    
-                    ctx.restore();
-                },
-                update: function() {
-                    this.life -= 16;
-                },
-                isDead: function() {
-                    return this.life <= 0;
-                }
-            };
-            this.particles.push(particle);
+    clearCanvasParticles() {
+        this.particles = [];
+        if (this.particles.length === 0 && !this.effects.protonBeam) {
+            this.stopAnimation();
         }
-        
-        this.startAnimation();
-        console.log('🎯 Partículas de teste criadas. Você deve ver círculos vermelhos numerados!');
-        
-        // Remover fundo após 3 segundos
-        setTimeout(() => {
-            this.canvas.style.backgroundColor = 'transparent';
-            console.log('🧹 Fundo de teste removido');
-        }, 3000);
+        console.log('🧹 Partículas canvas limpas');
     }
 
     /**
-     * Mostra efeito de falha na captura
+     * Teste de visibilidade - cria partículas DOM bem visíveis
      */
-    showCaptureFailEffect(x = null, y = null) {
-        if (x === null) x = window.innerWidth / 2;
-        if (y === null) y = window.innerHeight / 2;
+    testVisibility() {
+        console.log('🧪 Testando visibilidade com partículas DOM...');
+        
+        // Limpar partículas canvas antigas
+        this.clearCanvasParticles();
+        
+        // Criar partículas DOM grandes e coloridas
+        for (let i = 0; i < 10; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'dom-test-particle';
+            particle.textContent = i.toString();
+            
+            particle.style.cssText = `
+                position: fixed;
+                left: ${50 + i * 35}px;
+                top: 100px;
+                width: 30px;
+                height: 30px;
+                background: #FF0000;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 99999;
+                box-shadow: 0 0 15px #FF0000;
+                border: 3px solid #FFFFFF;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+            `;
 
-        // Criar efeito de "explosão" vermelha
-        for (let i = 0; i < 20; i++) {
-            const particle = new FailureParticle(x, y);
-            this.particles.push(particle);
+            document.body.appendChild(particle);
+
+            // Animar para chamar atenção
+            particle.animate([
+                { transform: 'scale(1)', opacity: 1 },
+                { transform: 'scale(1.2)', opacity: 0.8 },
+                { transform: 'scale(1)', opacity: 1 }
+            ], {
+                duration: 1000,
+                iterations: 3
+            });
+
+            // Remover após 5 segundos
+            setTimeout(() => {
+                particle.remove();
+            }, 5000);
+        }
+        
+        console.log('🎯 Partículas DOM de teste criadas. Você deve ver círculos vermelhos numerados!');
+        
+        // Teste adicional: criar uma grande no centro
+        const centerParticle = document.createElement('div');
+        centerParticle.textContent = '★';
+        centerParticle.style.cssText = `
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: #FFD700;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            box-shadow: 0 0 30px #FFD700;
+            border: 4px solid #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        `;
+
+        document.body.appendChild(centerParticle);
+
+        centerParticle.animate([
+            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)' },
+            { transform: 'translate(-50%, -50%) scale(1.3) rotate(180deg)' },
+            { transform: 'translate(-50%, -50%) scale(1) rotate(360deg)' }
+        ], {
+            duration: 2000,
+            iterations: 2
+        });
+
+        setTimeout(() => {
+            centerParticle.remove();
+        }, 5000);
+    }
+
+    /**
+     * Cria efeito de falha na captura
+     */
+    showCaptureFailEffect(x, y) {
+        console.log('💥 Criando efeito de falha DOM em:', x, y);
+
+        // Limpar partículas canvas antigas
+        this.clearCanvasParticles();
+
+        // Criar efeito DOM
+        this.createDOMFailEffect(x, y);
+    }
+
+    /**
+     * Cria efeito de falha usando elementos DOM
+     */
+    createDOMFailEffect(x, y) {
+        const particleCount = 12;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'dom-fail-particle';
+            
+            const size = Math.random() * 8 + 4;
+            const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+            const distance = Math.random() * 80 + 30;
+            
+            particle.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: ${size}px;
+                height: ${size}px;
+                background: #FF4444;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 99999;
+                box-shadow: 0 0 10px #FF4444;
+                border: 1px solid #FFFFFF;
+            `;
+
+            document.body.appendChild(particle);
+
+            // Animar explosão
+            const endX = x + Math.cos(angle) * distance;
+            const endY = y + Math.sin(angle) * distance;
+
+            particle.animate([
+                { 
+                    transform: 'translate(0, 0) scale(1)', 
+                    opacity: 1 
+                },
+                { 
+                    transform: `translate(${endX - x}px, ${endY - y}px) scale(0)`, 
+                    opacity: 0 
+                }
+            ], {
+                duration: 600 + Math.random() * 300,
+                easing: 'cubic-bezier(0.55, 0.085, 0.68, 0.53)'
+            }).onfinish = () => {
+                particle.remove();
+            };
         }
 
-        this.startAnimation();
+        console.log('💥 Criadas', particleCount, 'partículas de falha DOM');
     }
 }
 

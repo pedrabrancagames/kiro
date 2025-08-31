@@ -645,9 +645,12 @@ AFRAME.registerComponent('game-manager', {
             window.visualEffectsSystem.stopProtonBeamEffect();
 
             // NOVO: Efeito visual de falha na captura
+            console.log('💥 Tentando ativar efeito de falha...', !!this.activeGhostEntity);
             if (this.activeGhostEntity) {
                 const ghostPosition = this.getGhostScreenPosition();
+                console.log('👻 Posição do fantasma para falha:', ghostPosition);
                 window.visualEffectsSystem.showCaptureFailEffect(ghostPosition.x, ghostPosition.y);
+                console.log('💥 Efeito de falha ativado!');
             }
         }
 
@@ -688,15 +691,20 @@ AFRAME.registerComponent('game-manager', {
         }
 
         // Efeitos visuais de celebração e sucção
+        console.log('🎮 Tentando ativar efeitos visuais...', !!window.visualEffectsSystem);
         if (window.visualEffectsSystem) {
             // Efeito de sucção do fantasma para a proton pack
             const ghostPosition = this.getGhostScreenPosition();
             const protonPackPosition = this.getProtonPackScreenPosition();
 
+            console.log('👻 Posição do fantasma:', ghostPosition);
+            console.log('🔫 Posição da proton pack:', protonPackPosition);
+
             window.visualEffectsSystem.showSuctionEffect(
                 ghostPosition.x, ghostPosition.y,
                 protonPackPosition.x, protonPackPosition.y
             );
+            console.log('✨ Efeito de sucção ativado!');
 
             // Efeito de celebração após um pequeno delay
             setTimeout(() => {
@@ -704,7 +712,10 @@ AFRAME.registerComponent('game-manager', {
                     protonPackPosition.x, protonPackPosition.y,
                     'ghost_captured'
                 );
+                console.log('🎉 Efeito de celebração ativado!');
             }, 500);
+        } else {
+            console.error('❌ Sistema de efeitos visuais não disponível!');
         }
 
         if (this.activeGhostEntity) {
@@ -966,25 +977,44 @@ AFRAME.registerComponent('game-manager', {
 
 // Função global para testar efeitos visuais (acessível via console)
 window.testGhostbustersEffects = function () {
-    const gameManager = document.querySelector('[game-manager]');
-    if (gameManager && gameManager.components['game-manager']) {
-        gameManager.components['game-manager'].testVisualEffects();
-    } else {
-        console.warn('Game manager não encontrado. Testando efeitos diretamente...');
-
-        if (window.visualEffectsSystem) {
-            // Teste básico de celebração
-            window.visualEffectsSystem.showCelebrationEffect(
-                window.innerWidth / 2,
-                window.innerHeight / 2,
-                'ghost_captured'
+    console.log('🧪 Testando efeitos visuais...');
+    console.log('Sistema disponível:', !!window.visualEffectsSystem);
+    
+    if (window.visualEffectsSystem) {
+        // Teste básico de celebração
+        console.log('🎉 Testando celebração...');
+        window.visualEffectsSystem.showCelebrationEffect(
+            window.innerWidth / 2, 
+            window.innerHeight / 2, 
+            'ghost_captured'
+        );
+        
+        // Teste de sucção
+        setTimeout(() => {
+            console.log('🌪️ Testando sucção...');
+            window.visualEffectsSystem.showSuctionEffect(
+                window.innerWidth / 2 - 100, window.innerHeight / 2 - 100,
+                window.innerWidth / 2 + 100, window.innerHeight / 2 + 100
             );
-
-            if (window.showSuccess) {
-                showSuccess('Efeitos visuais testados com sucesso!');
-            }
-        } else {
-            console.error('Sistema de efeitos visuais não disponível');
+        }, 2000);
+        
+        // Teste de falha
+        setTimeout(() => {
+            console.log('💥 Testando falha...');
+            window.visualEffectsSystem.showCaptureFailEffect(
+                window.innerWidth / 2, 
+                window.innerHeight / 2
+            );
+        }, 4000);
+        
+        if (window.showSuccess) {
+            showSuccess('Efeitos visuais testados! Verifique o console.');
+        }
+        console.log('✅ Testes iniciados - verifique a tela!');
+    } else {
+        console.error('❌ Sistema de efeitos visuais não disponível');
+        if (window.showError) {
+            showError('Sistema de efeitos visuais não disponível!');
         }
     }
 };

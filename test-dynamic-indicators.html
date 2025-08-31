@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Indicadores Dinâmicos Ghostbusters AR</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #92F428;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #92F428;
+            box-shadow: 0 0 30px rgba(146, 244, 40, 0.3);
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-header h1 {
+            color: #92F428;
+            text-shadow: 0 0 10px rgba(146, 244, 40, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(146, 244, 40, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #92F428;
+        }
+
+        .test-section h3 {
+            color: #FFD700;
+            margin-top: 0;
+        }
+
+        .test-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #92F428, #7BC142);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .test-button:hover {
+            background: linear-gradient(135deg, #7BC142, #92F428);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(146, 244, 40, 0.4);
+        }
+
+        .test-button:active {
+            transform: translateY(0);
+        }
+
+        .mock-ui {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .mock-inventory {
+            position: relative;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50px;
+            padding: 15px;
+            border: 2px solid #92F428;
+        }
+
+        .mock-distance {
+            background: rgba(0, 0, 0, 0.8);
+            color: #92F428;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid #92F428;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .mock-proton-pack {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50px;
+            padding: 15px;
+            border: 2px solid #92F428;
+        }
+
+        .status-display {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎯 Teste dos Indicadores Dinâmicos</h1>
+            <p>Sistema avançado de feedback visual para Ghostbusters AR</p>
+        </div>
+
+        <!-- Teste do Badge do Inventário -->
+        <div class="test-section">
+            <h3>📦 Badge do Inventário</h3>
+            <div class="test-controls">
+                <button class="test-button" onclick="testInventoryState('normal')">Normal (0/5)</button>
+                <button class="test-button" onclick="testInventoryState('warning')">Aviso (4/5)</button>
+                <button class="test-button" onclick="testInventoryState('full')">Cheio (5/5)</button>
+                <button class="test-button" onclick="testInventoryState('critical')">Crítico (6/5)</button>
+            </div>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Quantidade no Inventário:</span>
+                    <span id="inventory-count">0</span>
+                </div>
+                <input type="range" class="slider" id="inventory-slider" min="0" max="7" value="0" 
+                       oninput="updateInventoryFromSlider(this.value)">
+            </div>
+        </div>
+
+        <!-- Teste de Proximidade -->
+        <div class="test-section">
+            <h3>👻 Indicadores de Proximidade</h3>
+            <div class="test-controls">
+                <button class="test-button" onclick="testProximity(150)">Longe (150m)</button>
+                <button class="test-button" onclick="testProximity(80)">Médio (80m)</button>
+                <button class="test-button" onclick="testProximity(30)">Perto (30m)</button>
+                <button class="test-button" onclick="testProximity(10)">Muito Perto (10m)</button>
+                <button class="test-button" onclick="testProximity(5)">Crítico (5m)</button>
+            </div>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Distância do Fantasma:</span>
+                    <span id="distance-value">100m</span>
+                </div>
+                <input type="range" class="slider" id="distance-slider" min="1" max="200" value="100" 
+                       oninput="updateProximityFromSlider(this.value)">
+            </div>
+        </div>
+
+        <!-- Teste de Captura -->
+        <div class="test-section">
+            <h3>⚡ Indicadores de Captura</h3>
+            <div class="test-controls">
+                <button class="test-button" onclick="simulateCapture()">Simular Captura Completa</button>
+                <button class="test-button" onclick="startCaptureTest()">Iniciar Captura</button>
+                <button class="test-button" onclick="cancelCaptureTest()">Cancelar Captura</button>
+            </div>
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Progresso da Captura:</span>
+                    <span id="capture-progress">0%</span>
+                </div>
+                <input type="range" class="slider" id="capture-slider" min="0" max="100" value="0" 
+                       oninput="updateCaptureProgress(this.value)">
+            </div>
+        </div>
+
+        <!-- Teste de Sucessos -->
+        <div class="test-section">
+            <h3>🎉 Indicadores de Sucesso</h3>
+            <div class="test-controls">
+                <button class="test-button" onclick="testSuccess('capture')">Captura Bem-sucedida</button>
+                <button class="test-button" onclick="testSuccess('deposit')">Depósito Realizado</button>
+                <button class="test-button" onclick="testSuccess('unlock')">Ecto-1 Desbloqueado</button>
+            </div>
+        </div>
+
+        <!-- Controles Gerais -->
+        <div class="test-section">
+            <h3>🔧 Controles Gerais</h3>
+            <div class="test-controls">
+                <button class="test-button" onclick="resetAllIndicators()">Resetar Tudo</button>
+                <button class="test-button" onclick="showSystemStatus()">Status do Sistema</button>
+                <button class="test-button" onclick="testAllSequence()">Teste Completo</button>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div class="status-display" id="status-display">
+            <strong>Status do Sistema:</strong><br>
+            Aguardando inicialização...
+        </div>
+    </div>
+
+    <!-- Mock UI Elements -->
+    <div class="mock-ui">
+        <div class="mock-inventory">
+            <div id="inventory-icon-container">
+                🎒
+                <div id="inventory-badge">0/5</div>
+            </div>
+        </div>
+        
+        <div class="mock-distance" id="distance-info">
+            Fantasma: 100m
+        </div>
+        
+        <div class="mock-proton-pack">
+            <div id="proton-pack-icon">⚡</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="dynamic-indicators.js"></script>
+    
+    <script>
+        let captureInterval = null;
+        let testSequenceRunning = false;
+
+        // Aguardar inicialização
+        setTimeout(() => {
+            updateStatus();
+        }, 500);
+
+        function testInventoryState(state) {
+            const counts = {
+                normal: [0, 5],
+                warning: [4, 5], 
+                full: [5, 5],
+                critical: [6, 5]
+            };
+            
+            const [current, max] = counts[state];
+            
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.setInventoryState(state, current, max);
+                document.getElementById('inventory-badge').textContent = `${current}/${max}`;
+                document.getElementById('inventory-slider').value = current;
+                document.getElementById('inventory-count').textContent = current;
+            }
+            
+            updateStatus();
+        }
+
+        function updateInventoryFromSlider(value) {
+            const current = parseInt(value);
+            const max = 5;
+            
+            document.getElementById('inventory-count').textContent = current;
+            document.getElementById('inventory-badge').textContent = `${current}/${max}`;
+            
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.updateInventoryIndicator(current, max);
+            }
+            
+            updateStatus();
+        }
+
+        function testProximity(distance) {
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.updateProximityIndicator(distance, 100);
+                document.getElementById('distance-info').textContent = `Fantasma: ${distance}m`;
+                document.getElementById('distance-slider').value = distance;
+                document.getElementById('distance-value').textContent = `${distance}m`;
+            }
+            
+            updateStatus();
+        }
+
+        function updateProximityFromSlider(value) {
+            const distance = parseInt(value);
+            
+            document.getElementById('distance-value').textContent = `${distance}m`;
+            document.getElementById('distance-info').textContent = `Fantasma: ${distance}m`;
+            
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.updateProximityIndicator(distance, 200);
+            }
+            
+            updateStatus();
+        }
+
+        function startCaptureTest() {
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.showCaptureIndicator(0);
+            }
+            updateStatus();
+        }
+
+        function cancelCaptureTest() {
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.hideCaptureIndicator();
+            }
+            clearInterval(captureInterval);
+            document.getElementById('capture-slider').value = 0;
+            document.getElementById('capture-progress').textContent = '0%';
+            updateStatus();
+        }
+
+        function updateCaptureProgress(value) {
+            const progress = parseInt(value);
+            
+            document.getElementById('capture-progress').textContent = `${progress}%`;
+            
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.showCaptureIndicator(progress);
+            }
+            
+            updateStatus();
+        }
+
+        function simulateCapture() {
+            let progress = 0;
+            
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.showCaptureIndicator(0);
+            }
+            
+            clearInterval(captureInterval);
+            captureInterval = setInterval(() => {
+                progress += 2;
+                
+                document.getElementById('capture-slider').value = progress;
+                document.getElementById('capture-progress').textContent = `${progress}%`;
+                
+                if (window.dynamicIndicators) {
+                    window.dynamicIndicators.showCaptureIndicator(progress);
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(captureInterval);
+                    setTimeout(() => {
+                        if (window.dynamicIndicators) {
+                            window.dynamicIndicators.hideCaptureIndicator();
+                            window.dynamicIndicators.showSuccessIndicator('capture');
+                        }
+                    }, 500);
+                }
+            }, 100);
+        }
+
+        function testSuccess(type) {
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.showSuccessIndicator(type);
+            }
+            updateStatus();
+        }
+
+        function resetAllIndicators() {
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.resetAllIndicators();
+            }
+            
+            // Reset UI
+            document.getElementById('inventory-badge').textContent = '0/5';
+            document.getElementById('distance-info').textContent = 'Fantasma: 100m';
+            document.getElementById('inventory-slider').value = 0;
+            document.getElementById('distance-slider').value = 100;
+            document.getElementById('capture-slider').value = 0;
+            document.getElementById('inventory-count').textContent = '0';
+            document.getElementById('distance-value').textContent = '100m';
+            document.getElementById('capture-progress').textContent = '0%';
+            
+            clearInterval(captureInterval);
+            updateStatus();
+        }
+
+        function showSystemStatus() {
+            updateStatus();
+            
+            if (window.dynamicIndicators) {
+                const status = window.dynamicIndicators.getStatus();
+                alert(`Status do Sistema:
+                
+Inicializado: ${status.isInitialized}
+Estado do Inventário: ${status.inventoryState}
+Nível de Proximidade: ${status.proximityLevel.toFixed(1)}%
+                
+Elementos encontrados:
+- Badge do Inventário: ${!!document.getElementById('inventory-badge')}
+- Info de Distância: ${!!document.getElementById('distance-info')}
+- Ícone Proton Pack: ${!!document.getElementById('proton-pack-icon')}`);
+            } else {
+                alert('Sistema de indicadores dinâmicos não inicializado!');
+            }
+        }
+
+        function testAllSequence() {
+            if (testSequenceRunning) return;
+            
+            testSequenceRunning = true;
+            let step = 0;
+            
+            const steps = [
+                () => { testInventoryState('normal'); console.log('Teste 1: Inventário normal'); },
+                () => { testProximity(150); console.log('Teste 2: Fantasma longe'); },
+                () => { testProximity(50); console.log('Teste 3: Fantasma se aproximando'); },
+                () => { testProximity(10); console.log('Teste 4: Fantasma muito perto'); },
+                () => { startCaptureTest(); console.log('Teste 5: Iniciando captura'); },
+                () => { simulateCapture(); console.log('Teste 6: Simulando captura'); },
+                () => { testInventoryState('warning'); console.log('Teste 7: Inventário quase cheio'); },
+                () => { testInventoryState('full'); console.log('Teste 8: Inventário cheio'); },
+                () => { testSuccess('deposit'); console.log('Teste 9: Depósito realizado'); },
+                () => { resetAllIndicators(); console.log('Teste 10: Reset completo'); testSequenceRunning = false; }
+            ];
+            
+            function runNextStep() {
+                if (step < steps.length) {
+                    steps[step]();
+                    step++;
+                    setTimeout(runNextStep, 2000);
+                }
+            }
+            
+            runNextStep();
+        }
+
+        function updateStatus() {
+            const statusDiv = document.getElementById('status-display');
+            
+            if (window.dynamicIndicators) {
+                const status = window.dynamicIndicators.getStatus();
+                statusDiv.innerHTML = `
+                    <strong>Status do Sistema:</strong><br>
+                    ✅ Inicializado: ${status.isInitialized}<br>
+                    📦 Estado do Inventário: ${status.inventoryState}<br>
+                    👻 Nível de Proximidade: ${status.proximityLevel.toFixed(1)}%<br>
+                    🕒 Última atualização: ${new Date().toLocaleTimeString()}
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <strong>Status do Sistema:</strong><br>
+                    ❌ Sistema não inicializado<br>
+                    🕒 ${new Date().toLocaleTimeString()}
+                `;
+            }
+        }
+
+        // Atualizar status a cada 5 segundos
+        setInterval(updateStatus, 5000);
+    </script>
+</body>
+</html>

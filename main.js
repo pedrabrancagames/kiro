@@ -194,12 +194,40 @@ AFRAME.registerComponent('game-manager', {
             }
             this.stopQrScanner();
         });
-        this.protonPackIcon.addEventListener('mousedown', this.startCapture);
-        this.protonPackIcon.addEventListener('mouseup', this.cancelCapture);
-        this.protonPackIcon.addEventListener('mouseleave', this.cancelCapture);
-        this.protonPackIcon.addEventListener('touchstart', this.startCapture);
-        this.protonPackIcon.addEventListener('touchend', this.cancelCapture);
-        this.protonPackIcon.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); });
+        // Event listeners com prevenção de conflitos mouse/touch
+        this.protonPackIcon.addEventListener('mousedown', (e) => {
+            if (e.pointerType !== 'touch') { // Evitar conflito com touch
+                this.startCapture();
+            }
+        });
+        this.protonPackIcon.addEventListener('mouseup', (e) => {
+            if (e.pointerType !== 'touch') {
+                this.cancelCapture();
+            }
+        });
+        this.protonPackIcon.addEventListener('mouseleave', (e) => {
+            if (e.pointerType !== 'touch') {
+                this.cancelCapture();
+            }
+        });
+        
+        // Touch events com prevenção de cancelamento imediato
+        this.protonPackIcon.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevenir mouse events duplicados
+            this.startCapture();
+        });
+        this.protonPackIcon.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            // Delay para evitar cancelamento imediato
+            setTimeout(() => {
+                this.cancelCapture();
+            }, 50);
+        });
+        
+        this.protonPackIcon.addEventListener('contextmenu', (e) => { 
+            e.preventDefault(); 
+            e.stopPropagation(); 
+        });
         this.notificationCloseButton.addEventListener('click', () => {
             if (window.animationManager) {
                 window.animationManager.triggerHapticFeedback('button_press');
@@ -274,6 +302,11 @@ AFRAME.registerComponent('game-manager', {
             window.animationManager.setInventoryFullState(this.inventory.length >= this.INVENTORY_LIMIT);
         }
 
+        // Usar sistema de indicadores dinâmicos
+        if (window.dynamicIndicators) {
+            window.dynamicIndicators.updateInventoryIndicator(this.inventory.length, this.INVENTORY_LIMIT);
+        }
+
         // Usar o novo sistema de animações do inventário
         if (window.inventoryAnimations) {
             window.inventoryAnimations.updateGhostList(this.inventory);
@@ -310,6 +343,11 @@ AFRAME.registerComponent('game-manager', {
         // Feedback tátil para sucesso do depósito
         if (window.animationManager) {
             window.animationManager.triggerHapticFeedback('success');
+        }
+
+        // Mostrar indicador de sucesso para depósito
+        if (window.dynamicIndicators) {
+            window.dynamicIndicators.showSuccessIndicator('deposit');
         }
 
         showSuccess("Fantasmas depositados com sucesso!");
@@ -468,6 +506,11 @@ AFRAME.registerComponent('game-manager', {
             const aGhost = Math.sin(dPhiGhost / 2) * Math.sin(dPhiGhost / 2) + Math.cos(userLat * Math.PI / 180) * Math.cos(this.ghostData.lat * Math.PI / 180) * Math.sin(dLambdaGhost / 2) * Math.sin(dLambdaGhost / 2);
             const distanceGhost = R * (2 * Math.atan2(Math.sqrt(aGhost), Math.sqrt(1 - aGhost)));
 
+            // Atualizar indicadores de proximidade dinâmicos
+            if (window.dynamicIndicators) {
+                window.dynamicIndicators.updateProximityIndicator(distanceGhost, 100);
+            }
+
             if (distanceGhost <= this.CAPTURE_RADIUS) {
                 // Feedback tátil apenas na primeira vez que fica próximo
                 if (!this.objectToPlace && window.animationManager) {
@@ -523,6 +566,7 @@ AFRAME.registerComponent('game-manager', {
         }
 
         this.isCapturing = true;
+        this.captureStartTime = Date.now(); // Marcar o tempo de início da captura
         this.protonBeamSound.play();
         this.protonBeamEntity.setAttribute('visible', true); // Mostra o feixe de prótons
 
@@ -530,6 +574,11 @@ AFRAME.registerComponent('game-manager', {
         if (window.animationManager) {
             window.animationManager.startCaptureHaptics();
             window.animationManager.setCapturingState(true);
+        }
+
+        // Mostrar indicador de captura
+        if (window.dynamicIndicators) {
+            window.dynamicIndicators.showCaptureIndicator(0);
         }
 
         // Iniciar efeito visual do feixe de prótons
@@ -576,6 +625,11 @@ AFRAME.registerComponent('game-manager', {
                 },
                 // Callback de atualização
                 (progress, normalizedProgress) => {
+                    // Atualizar indicador de captura dinâmico
+                    if (window.dynamicIndicators) {
+                        window.dynamicIndicators.showCaptureIndicator(progress);
+                    }
+
                     // Efeitos especiais baseados no progresso
                     if (progress > 50 && progress <= 80) {
                         this.protonPackProgressBar.classList.add('phase-middle');
@@ -612,6 +666,17 @@ AFRAME.registerComponent('game-manager', {
 
     cancelCapture: function () {
         if (!this.isCapturing) return;
+        
+        // Prevenir cancelamento imediato (delay mínimo de 300ms)
+        const minCaptureTime = 300;
+        const elapsedTime = Date.now() - (this.captureStartTime || 0);
+        
+        if (elapsedTime < minCaptureTime) {
+            console.log('🚫 Cancelamento muito rápido, ignorando...', elapsedTime + 'ms');
+            return;
+        }
+        
+        console.log('✅ Cancelando captura após', elapsedTime + 'ms');
         this.isCapturing = false;
         this.protonBeamSound.pause();
         this.protonBeamSound.currentTime = 0;
@@ -638,6 +703,12 @@ AFRAME.registerComponent('game-manager', {
         if (window.animationManager) {
             window.animationManager.stopCaptureHaptics();
             window.animationManager.setCapturingState(false);
+        }
+
+        // Esconder indicador de captura
+        if (window.dynamicIndicators) {
+            window.dynamicIndicators.hideCaptureIndicator();
+        }
         }
 
         // Parar efeito visual do feixe de prótons
@@ -688,6 +759,11 @@ AFRAME.registerComponent('game-manager', {
         if (window.animationManager) {
             window.animationManager.captureSuccessHaptics();
             window.animationManager.addHapticSuccessEffect('#proton-pack-icon');
+        }
+
+        // Mostrar indicador de sucesso
+        if (window.dynamicIndicators) {
+            window.dynamicIndicators.showSuccessIndicator('capture');
         }
 
         // Efeitos visuais de celebração e sucção

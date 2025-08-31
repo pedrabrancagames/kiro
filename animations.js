@@ -15,7 +15,43 @@ class AnimationManager {
         this.setupHoverEffects();
         this.setupContextualHaptics();
         this.captureHapticInterval = null;
+        this.createTestButton(); // Botão de teste temporário
         console.log('Sistema de animações e feedback tátil inicializado');
+    }
+
+    /**
+     * Cria um botão de teste para verificar animações (temporário)
+     */
+    createTestButton() {
+        const testButton = document.createElement('button');
+        testButton.id = 'animation-test-button';
+        testButton.textContent = 'TESTE ANIMAÇÃO';
+        testButton.style.cssText = `
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 9999;
+            padding: 10px 20px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        `;
+        
+        testButton.addEventListener('click', () => {
+            console.log('Botão de teste clicado!');
+            this.triggerHapticFeedback('medium');
+            testButton.classList.add('animate-button-press');
+            setTimeout(() => {
+                testButton.classList.remove('animate-button-press');
+            }, 150);
+        });
+
+        document.body.appendChild(testButton);
+        this.addButtonAnimation(testButton);
+        console.log('Botão de teste criado');
     }
 
     /**
@@ -55,14 +91,21 @@ class AnimationManager {
      * Adiciona animação de clique a um elemento
      */
     addButtonAnimation(element) {
-        if (!element || this.isReducedMotion) return;
+        if (!element || this.isReducedMotion) {
+            console.log('Animação não adicionada:', element, 'Reduced motion:', this.isReducedMotion);
+            return;
+        }
+
+        console.log('Adicionando animação para:', element);
 
         element.addEventListener('mousedown', () => {
+            console.log('Mouse down - adicionando animate-button-press');
             element.classList.add('animate-button-press');
         });
 
         element.addEventListener('mouseup', () => {
             setTimeout(() => {
+                console.log('Mouse up - removendo animate-button-press');
                 element.classList.remove('animate-button-press');
             }, 150);
         });
@@ -72,15 +115,21 @@ class AnimationManager {
         });
 
         // Suporte para touch
-        element.addEventListener('touchstart', () => {
+        element.addEventListener('touchstart', (e) => {
+            console.log('Touch start - adicionando animate-button-press');
             element.classList.add('animate-button-press');
+            e.preventDefault();
         });
 
         element.addEventListener('touchend', () => {
             setTimeout(() => {
+                console.log('Touch end - removendo animate-button-press');
                 element.classList.remove('animate-button-press');
             }, 150);
         });
+
+        // Adicionar classe para transições suaves
+        element.classList.add('smooth-transition');
     }
 
     /**
@@ -475,13 +524,27 @@ class AnimationManager {
     }
 }
 
-// Inicializar o sistema de animações quando o DOM estiver pronto
+// Inicializar o sistema de animações
 let animationManager;
 
-document.addEventListener('DOMContentLoaded', () => {
-    animationManager = new AnimationManager();
-});
+function initAnimationManager() {
+    if (!animationManager) {
+        animationManager = new AnimationManager();
+        window.animationManager = animationManager;
+        console.log('AnimationManager inicializado:', animationManager);
+    }
+}
+
+// Tentar inicializar imediatamente se DOM já estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnimationManager);
+} else {
+    // DOM já está pronto
+    initAnimationManager();
+}
+
+// Também tentar inicializar quando a janela carregar completamente
+window.addEventListener('load', initAnimationManager);
 
 // Exportar para uso global
 window.AnimationManager = AnimationManager;
-window.animationManager = animationManager;

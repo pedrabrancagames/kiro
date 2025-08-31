@@ -9,7 +9,9 @@
   - Implementar transições suaves para mudanças de estado
   - _Requisitos: 1.1, 1.2, 1.3, 1.4_
 
-- [-] 2. Criar sistema de feedback tátil
+- [x] 2. Criar sistema de feedback tátil
+
+
 
   - Implementar classe HapticFeedback usando Vibration API
   - Adicionar feedback tátil para cliques em botões

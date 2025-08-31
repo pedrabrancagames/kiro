@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Sistema de Notificações</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="padding: 20px; background: #222; color: white;">
+    <h1>Teste do Sistema de Notificações Toast</h1>
+    
+    <div style="margin: 20px 0;">
+        <button onclick="showSuccess('Fantasma capturado com sucesso!')" style="margin: 5px; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Teste Success
+        </button>
+        
+        <button onclick="showError('Erro ao conectar com o servidor!')" style="margin: 5px; padding: 10px; background: #F44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Teste Error
+        </button>
+        
+        <button onclick="showWarning('Inventário cheio! Encontre uma Unidade de Contenção.')" style="margin: 5px; padding: 10px; background: #FF9800; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Teste Warning
+        </button>
+        
+        <button onclick="showInfo('Bem-vindo ao mundo AR! Procure por fantasmas ao seu redor.')" style="margin: 5px; padding: 10px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Teste Info
+        </button>
+        
+        <button onclick="testMultiple()" style="margin: 5px; padding: 10px; background: #9C27B0; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Teste Múltiplas
+        </button>
+        
+        <button onclick="dismissAllToasts()" style="margin: 5px; padding: 10px; background: #607D8B; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Limpar Todas
+        </button>
+    </div>
+
+    <script src="animations.js"></script>
+    <script src="notifications.js"></script>
+    
+    <script>
+        function testMultiple() {
+            showInfo('Primeira notificação');
+            setTimeout(() => showSuccess('Segunda notificação'), 500);
+            setTimeout(() => showWarning('Terceira notificação'), 1000);
+            setTimeout(() => showError('Quarta notificação'), 1500);
+        }
+    </script>
+</body>
+</html>

@@ -140,7 +140,11 @@ AFRAME.registerComponent('game-manager', {
             }
             try {
                 await this.el.sceneEl.enterAR();
-            } catch (e) { alert("Erro ao iniciar AR: " + e.message); }
+                // Notificação de boas-vindas ao AR
+                setTimeout(() => {
+                    showInfo("👻 Bem-vindo ao mundo AR! Procure por fantasmas ao seu redor.", 5000);
+                }, 1000);
+            } catch (e) { showError("Erro ao iniciar AR: " + e.message); }
         });
         this.locationButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -284,7 +288,7 @@ AFRAME.registerComponent('game-manager', {
             window.animationManager.triggerHapticFeedback('success');
         }
         
-        alert("Fantasmas depositados com sucesso!");
+        showSuccess("Fantasmas depositados com sucesso!");
         this.generateGhost();
     },
 
@@ -298,7 +302,7 @@ AFRAME.registerComponent('game-manager', {
                 window.animationManager.triggerHapticFeedback('error');
                 window.animationManager.addHapticErrorEffect('#qr-reader');
             }
-            alert("QR Code inválido!");
+            showError("QR Code inválido!");
         }
     },
 
@@ -331,7 +335,7 @@ AFRAME.registerComponent('game-manager', {
                 this.onScanSuccess,
                 () => { }
             ).catch(err => {
-                this.showNotification("Erro ao iniciar scanner de QR Code. Verifique as permissões da câmera no navegador.");
+                showError("Erro ao iniciar scanner de QR Code. Verifique as permissões da câmera no navegador.");
                 this.stopQrScanner();
             });
         }, 200); // Atraso de 200ms
@@ -406,7 +410,7 @@ AFRAME.registerComponent('game-manager', {
 
     startGps: function () {
         navigator.geolocation.watchPosition(this.onGpsUpdate, 
-            () => { alert("Não foi possível obter sua localização."); },
+            () => { showError("Não foi possível obter sua localização."); },
             { enableHighAccuracy: true }
         );
     },
@@ -590,18 +594,23 @@ AFRAME.registerComponent('game-manager', {
                 window.animationManager.inventoryFullHaptics();
                 window.animationManager.setInventoryFullState(true);
             }
+            // Notificação de inventário cheio
+            showWarning("Inventário cheio! Encontre uma Unidade de Contenção para depositar os fantasmas.", 6000);
         }
 
         if (this.userStats.captures >= this.ECTO1_UNLOCK_COUNT && !this.userStats.ecto1Unlocked) {
             this.userStats.ecto1Unlocked = true;
             this.showEcto1OnMap();
-            captureMessage += "\n\nVocê ouve um barulho de motor familiar... Algo especial apareceu no mapa!";
+            // Notificação especial para o Ecto-1
+            setTimeout(() => {
+                showSuccess("🚗 ECTO-1 DESBLOQUEADO! Você ouve um barulho de motor familiar... Algo especial apareceu no mapa!", 8000);
+            }, 2000);
         }
 
         const userRef = ref(this.database, 'users/' + this.currentUser.uid);
         update(userRef, { points: this.userStats.points, captures: this.userStats.captures, inventory: this.inventory, ecto1Unlocked: this.userStats.ecto1Unlocked });
 
-        this.showNotification(captureMessage);
+        showSuccess(captureMessage);
         this.generateGhost();
     },
 

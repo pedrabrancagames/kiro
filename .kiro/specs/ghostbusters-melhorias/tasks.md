@@ -18,7 +18,8 @@
   - Integrar vibração para eventos de captura e sucesso
   - _Requisitos: 1.5_
 
-- [ ] 3. Desenvolver sistema de notificações toast
+- [-] 3. Desenvolver sistema de notificações toast
+
   - Criar classe NotificationSystem para gerenciar mensagens
   - Implementar diferentes tipos de toast (success, error, warning, info)
   - Adicionar sistema de fila e auto-dismiss para múltiplas notificações

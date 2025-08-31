@@ -47,7 +47,7 @@ class VisualEffectsSystem {
             width: 100vw;
             height: 100vh;
             pointer-events: none;
-            z-index: 100;
+            z-index: 9999;
         `;
         
         document.body.appendChild(this.canvas);
@@ -351,6 +351,64 @@ class VisualEffectsSystem {
     }
 
     /**
+     * Teste de visibilidade - cria partículas bem visíveis
+     */
+    testVisibility() {
+        console.log('🧪 Testando visibilidade das partículas...');
+        
+        // Adicionar fundo temporário ao canvas para teste
+        this.canvas.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+        
+        // Criar partículas grandes e coloridas
+        for (let i = 0; i < 10; i++) {
+            const particle = {
+                x: 50 + i * 30,
+                y: 100,
+                size: 20,
+                color: '#FF0000', // Vermelho bem visível
+                life: 5000,
+                maxLife: 5000,
+                rotation: 0,
+                render: function(ctx) {
+                    ctx.save();
+                    ctx.fillStyle = this.color;
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 3;
+                    
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Adicionar texto para identificar
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(i.toString(), this.x, this.y + 4);
+                    
+                    ctx.restore();
+                },
+                update: function() {
+                    this.life -= 16;
+                },
+                isDead: function() {
+                    return this.life <= 0;
+                }
+            };
+            this.particles.push(particle);
+        }
+        
+        this.startAnimation();
+        console.log('🎯 Partículas de teste criadas. Você deve ver círculos vermelhos numerados!');
+        
+        // Remover fundo após 3 segundos
+        setTimeout(() => {
+            this.canvas.style.backgroundColor = 'transparent';
+            console.log('🧹 Fundo de teste removido');
+        }, 3000);
+    }
+
+    /**
      * Mostra efeito de falha na captura
      */
     showCaptureFailEffect(x = null, y = null) {
@@ -412,8 +470,21 @@ class CelebrationParticle {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
         
+        // Adicionar sombra para maior visibilidade
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Desenhar partícula como círculo com borda
         ctx.fillStyle = this.color;
-        ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1;
+        
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
         
         ctx.restore();
     }
@@ -606,3 +677,12 @@ setTimeout(initVisualEffectsSystem, 0);
 
 // Exportar para uso global
 window.VisualEffectsSystem = VisualEffectsSystem;
+
+// Função global para testar visibilidade
+window.testVisualEffectsVisibility = function() {
+    if (window.visualEffectsSystem) {
+        window.visualEffectsSystem.testVisibility();
+    } else {
+        console.error('Sistema de efeitos visuais não disponível');
+    }
+};

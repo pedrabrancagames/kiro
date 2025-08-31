@@ -127,15 +127,26 @@ AFRAME.registerComponent('game-manager', {
     },
 
     addEventListeners: function () {
-        this.googleLoginButton.addEventListener('click', () => signInWithPopup(this.auth, this.provider));
+        this.googleLoginButton.addEventListener('click', () => {
+            if (window.animationManager) {
+                window.animationManager.triggerHapticFeedback('button_press');
+            }
+            signInWithPopup(this.auth, this.provider);
+        });
         this.enterButton.addEventListener('click', async () => {
             if (!this.selectedLocation) return;
+            if (window.animationManager) {
+                window.animationManager.arEnterHaptics();
+            }
             try {
                 await this.el.sceneEl.enterAR();
             } catch (e) { alert("Erro ao iniciar AR: " + e.message); }
         });
         this.locationButtons.forEach(button => {
             button.addEventListener('click', () => {
+                if (window.animationManager) {
+                    window.animationManager.triggerHapticFeedback('button_press');
+                }
                 this.locationButtons.forEach(btn => btn.classList.remove('selected'));
                 button.classList.add('selected');
                 this.selectedLocation = this.locations[button.dataset.locationName];
@@ -145,26 +156,41 @@ AFRAME.registerComponent('game-manager', {
         });
         this.inventoryIconContainer.addEventListener('click', () => {
             this.inventoryModal.classList.remove('hidden');
-            // Adicionar feedback tátil
+            // Adicionar feedback tátil para abertura de modal
             if (window.animationManager) {
-                window.animationManager.triggerHapticFeedback('light');
+                window.animationManager.triggerHapticFeedback('modal_open');
             }
         });
         this.closeInventoryButton.addEventListener('click', () => {
             this.inventoryModal.classList.add('hidden');
             if (window.animationManager) {
-                window.animationManager.triggerHapticFeedback('light');
+                window.animationManager.triggerHapticFeedback('button_press');
             }
         });
-        this.depositButton.addEventListener('click', this.startQrScanner);
-        this.closeScannerButton.addEventListener('click', this.stopQrScanner);
+        this.depositButton.addEventListener('click', () => {
+            if (window.animationManager) {
+                window.animationManager.triggerHapticFeedback('button_press');
+            }
+            this.startQrScanner();
+        });
+        this.closeScannerButton.addEventListener('click', () => {
+            if (window.animationManager) {
+                window.animationManager.triggerHapticFeedback('button_press');
+            }
+            this.stopQrScanner();
+        });
         this.protonPackIcon.addEventListener('mousedown', this.startCapture);
         this.protonPackIcon.addEventListener('mouseup', this.cancelCapture);
         this.protonPackIcon.addEventListener('mouseleave', this.cancelCapture);
         this.protonPackIcon.addEventListener('touchstart', this.startCapture);
         this.protonPackIcon.addEventListener('touchend', this.cancelCapture);
         this.protonPackIcon.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); });
-        this.notificationCloseButton.addEventListener('click', this.hideNotification);
+        this.notificationCloseButton.addEventListener('click', () => {
+            if (window.animationManager) {
+                window.animationManager.triggerHapticFeedback('button_press');
+            }
+            this.hideNotification();
+        });
         this.el.sceneEl.addEventListener('enter-vr', this.initGame);
     },
 
@@ -173,14 +199,14 @@ AFRAME.registerComponent('game-manager', {
         this.notificationModal.classList.remove('hidden');
         // Adicionar feedback tátil para notificações
         if (window.animationManager) {
-            window.animationManager.triggerHapticFeedback('medium');
+            window.animationManager.triggerHapticFeedback('notification');
         }
     },
 
     hideNotification: function () {
         this.notificationModal.classList.add('hidden');
         if (window.animationManager) {
-            window.animationManager.triggerHapticFeedback('light');
+            window.animationManager.triggerHapticFeedback('button_press');
         }
     },
 
@@ -227,6 +253,12 @@ AFRAME.registerComponent('game-manager', {
 
     updateInventoryUI: function () {
         this.inventoryBadge.innerText = `${this.inventory.length}/${this.INVENTORY_LIMIT}`;
+        
+        // Atualizar estado visual do inventário
+        if (window.animationManager) {
+            window.animationManager.setInventoryFullState(this.inventory.length >= this.INVENTORY_LIMIT);
+        }
+        
         this.ghostList.innerHTML = '';
         if (this.inventory.length === 0) {
             this.ghostList.innerHTML = '<li>Inventário vazio.</li>';
@@ -246,6 +278,12 @@ AFRAME.registerComponent('game-manager', {
         const userRef = ref(this.database, 'users/' + this.currentUser.uid);
         update(userRef, { inventory: this.inventory });
         this.updateInventoryUI();
+        
+        // Feedback tátil para sucesso do depósito
+        if (window.animationManager) {
+            window.animationManager.triggerHapticFeedback('success');
+        }
+        
         alert("Fantasmas depositados com sucesso!");
         this.generateGhost();
     },
@@ -255,6 +293,11 @@ AFRAME.registerComponent('game-manager', {
         if (decodedText === this.CONTAINMENT_UNIT_ID) {
             this.depositGhosts();
         } else {
+            // Feedback tátil para QR Code inválido e efeito visual
+            if (window.animationManager) {
+                window.animationManager.triggerHapticFeedback('error');
+                window.animationManager.addHapticErrorEffect('#qr-reader');
+            }
             alert("QR Code inválido!");
         }
     },
@@ -393,6 +436,11 @@ AFRAME.registerComponent('game-manager', {
             const distanceGhost = R * (2 * Math.atan2(Math.sqrt(aGhost), Math.sqrt(1 - aGhost)));
 
             if (distanceGhost <= this.CAPTURE_RADIUS) {
+                // Feedback tátil apenas na primeira vez que fica próximo
+                if (!this.objectToPlace && window.animationManager) {
+                    window.animationManager.ghostNearbyHaptics();
+                    window.animationManager.setGhostNearbyState(true);
+                }
                 this.objectToPlace = 'ghost';
                 this.activeGhostEntity = this.ghostData.type === 'Fantasma Forte' ? this.ghostForteEntity : this.ghostComumEntity;
                 this.distanceInfo.innerText = `FANTASMA ${this.ghostData.type.toUpperCase()} PRÓXIMO!`;
@@ -411,6 +459,10 @@ AFRAME.registerComponent('game-manager', {
             const distanceEcto = R * (2 * Math.atan2(Math.sqrt(aEcto), Math.sqrt(1 - aEcto)));
 
             if (distanceEcto <= this.CAPTURE_RADIUS) {
+                // Feedback tátil apenas na primeira vez que fica próximo do Ecto-1
+                if (this.objectToPlace !== 'ecto1' && window.animationManager) {
+                    window.animationManager.triggerHapticFeedback('success');
+                }
                 this.objectToPlace = 'ecto1';
                 this.distanceInfo.innerText = "ECTO-1 PRÓXIMO! OLHE AO REDOR!";
                 this.distanceInfo.style.color = "#00aaff";
@@ -421,6 +473,10 @@ AFRAME.registerComponent('game-manager', {
         if (!isNearObject) {
             this.objectToPlace = null;
             this.activeGhostEntity = null;
+            // Remover efeito visual de fantasma próximo
+            if (window.animationManager) {
+                window.animationManager.setGhostNearbyState(false);
+            }
         }
     },
 
@@ -436,6 +492,12 @@ AFRAME.registerComponent('game-manager', {
         this.isCapturing = true;
         this.protonBeamSound.play();
         this.protonBeamEntity.setAttribute('visible', true); // Mostra o feixe de prótons
+        
+        // Iniciar feedback tátil de captura e efeito visual
+        if (window.animationManager) {
+            window.animationManager.startCaptureHaptics();
+            window.animationManager.setCapturingState(true);
+        }
 
         // Define os pontos de início e fim do feixe em coordenadas relativas à câmera
         const startPoint = new THREE.Vector3(0.15, -0.4, -0.5); // Ponta da pistola
@@ -481,6 +543,12 @@ AFRAME.registerComponent('game-manager', {
         this.protonPackProgressBar.style.display = 'none';
         this.protonPackProgressFill.style.height = '0%';
 
+        // Parar feedback tátil de captura e efeito visual
+        if (window.animationManager) {
+            window.animationManager.stopCaptureHaptics();
+            window.animationManager.setCapturingState(false);
+        }
+
         // Retoma as animações do fantasma
         if (this.currentRotatorEntity && this.currentBobberEntity) {
             this.currentRotatorEntity.components.animation__rotation.play();
@@ -491,6 +559,13 @@ AFRAME.registerComponent('game-manager', {
     ghostCaptured: function () {
         this.cancelCapture();
         this.ghostCaptureSound.play(); // Som de captura bem-sucedida
+        
+        // Feedback tátil de sucesso na captura e efeito visual
+        if (window.animationManager) {
+            window.animationManager.captureSuccessHaptics();
+            window.animationManager.addHapticSuccessEffect('#proton-pack-icon');
+        }
+        
         if (this.activeGhostEntity) {
             this.activeGhostEntity.setAttribute('visible', false);
         }
@@ -510,6 +585,11 @@ AFRAME.registerComponent('game-manager', {
 
         if (this.inventory.length === this.INVENTORY_LIMIT) {
             this.inventoryFullSound.play(); // Som de inventário cheio
+            // Feedback tátil para inventário cheio e efeito visual
+            if (window.animationManager) {
+                window.animationManager.inventoryFullHaptics();
+                window.animationManager.setInventoryFullState(true);
+            }
         }
 
         if (this.userStats.captures >= this.ECTO1_UNLOCK_COUNT && !this.userStats.ecto1Unlocked) {

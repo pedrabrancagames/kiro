@@ -1,13 +1,16 @@
 # Plano de Implementação - Melhorias na Interface e UX do Ghostbusters AR
 
-- [-] 1. Implementar sistema de animações CSS básicas
+- [x] 1. Implementar sistema de animações CSS básicas
+
+
 
   - Criar keyframes para animações de botões, modais e transições
   - Adicionar classes CSS para diferentes tipos de animação
   - Implementar transições suaves para mudanças de estado
   - _Requisitos: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2. Criar sistema de feedback tátil
+- [-] 2. Criar sistema de feedback tátil
+
   - Implementar classe HapticFeedback usando Vibration API
   - Adicionar feedback tátil para cliques em botões
   - Integrar vibração para eventos de captura e sucesso

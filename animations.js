@@ -13,7 +13,9 @@ class AnimationManager {
         this.setupButtonAnimations();
         this.setupModalAnimations();
         this.setupHoverEffects();
-        console.log('Sistema de animações inicializado');
+        this.setupContextualHaptics();
+        this.captureHapticInterval = null;
+        console.log('Sistema de animações e feedback tátil inicializado');
     }
 
     /**
@@ -300,11 +302,176 @@ class AnimationManager {
             medium: 100,
             heavy: 200,
             success: [100, 50, 100],
-            error: [200, 100, 200, 100, 200]
+            error: [200, 100, 200, 100, 200],
+            capture_start: [50, 30, 50],
+            capture_progress: 30,
+            capture_success: [150, 50, 150, 50, 150],
+            ghost_nearby: [80, 40, 80],
+            inventory_full: [200, 100, 200],
+            button_press: 40,
+            modal_open: 60,
+            notification: 80,
+            ar_enter: [100, 50, 100, 50, 100]
         };
 
         const pattern = patterns[type] || patterns.light;
         navigator.vibrate(pattern);
+    }
+
+    /**
+     * Sistema de feedback tátil contextual
+     */
+    setupContextualHaptics() {
+        // Feedback para diferentes contextos do jogo
+        this.hapticContexts = {
+            ui: ['button_press', 'modal_open', 'notification'],
+            gameplay: ['capture_start', 'capture_progress', 'capture_success', 'ghost_nearby'],
+            system: ['success', 'error', 'inventory_full', 'ar_enter']
+        };
+    }
+
+    /**
+     * Feedback tátil para captura de fantasma
+     */
+    startCaptureHaptics() {
+        if (!navigator.vibrate) return;
+        
+        // Vibração inicial ao começar captura
+        this.triggerHapticFeedback('capture_start');
+        
+        // Vibração contínua durante captura (a cada 500ms)
+        this.captureHapticInterval = setInterval(() => {
+            this.triggerHapticFeedback('capture_progress');
+        }, 500);
+    }
+
+    /**
+     * Para feedback tátil de captura
+     */
+    stopCaptureHaptics() {
+        if (this.captureHapticInterval) {
+            clearInterval(this.captureHapticInterval);
+            this.captureHapticInterval = null;
+        }
+    }
+
+    /**
+     * Feedback tátil para sucesso de captura
+     */
+    captureSuccessHaptics() {
+        this.stopCaptureHaptics();
+        this.triggerHapticFeedback('capture_success');
+    }
+
+    /**
+     * Feedback tátil para proximidade de fantasma
+     */
+    ghostNearbyHaptics() {
+        this.triggerHapticFeedback('ghost_nearby');
+    }
+
+    /**
+     * Feedback tátil para inventário cheio
+     */
+    inventoryFullHaptics() {
+        this.triggerHapticFeedback('inventory_full');
+    }
+
+    /**
+     * Feedback tátil para entrada no AR
+     */
+    arEnterHaptics() {
+        this.triggerHapticFeedback('ar_enter');
+    }
+
+    /**
+     * Adiciona efeito visual de press com feedback tátil
+     */
+    addHapticPressEffect(element) {
+        if (typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+        
+        if (element && !this.isReducedMotion) {
+            element.classList.add('haptic-press');
+            setTimeout(() => {
+                element.classList.remove('haptic-press');
+            }, 150);
+        }
+    }
+
+    /**
+     * Adiciona efeito visual de sucesso com feedback tátil
+     */
+    addHapticSuccessEffect(element) {
+        if (typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+        
+        if (element && !this.isReducedMotion) {
+            element.classList.add('haptic-success');
+            setTimeout(() => {
+                element.classList.remove('haptic-success');
+            }, 600);
+        }
+    }
+
+    /**
+     * Adiciona efeito visual de erro com feedback tátil
+     */
+    addHapticErrorEffect(element) {
+        if (typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+        
+        if (element && !this.isReducedMotion) {
+            element.classList.add('haptic-error');
+            setTimeout(() => {
+                element.classList.remove('haptic-error');
+            }, 500);
+        }
+    }
+
+    /**
+     * Ativa estado visual de captura
+     */
+    setCapturingState(active = true) {
+        const protonPackIcon = document.querySelector('#proton-pack-icon');
+        if (protonPackIcon) {
+            if (active) {
+                protonPackIcon.classList.add('capturing');
+            } else {
+                protonPackIcon.classList.remove('capturing');
+            }
+        }
+    }
+
+    /**
+     * Ativa estado visual de inventário cheio
+     */
+    setInventoryFullState(full = true) {
+        const inventoryBadge = document.querySelector('#inventory-badge');
+        if (inventoryBadge) {
+            if (full) {
+                inventoryBadge.classList.add('full');
+            } else {
+                inventoryBadge.classList.remove('full');
+            }
+        }
+    }
+
+    /**
+     * Ativa estado visual de fantasma próximo
+     */
+    setGhostNearbyState(nearby = true) {
+        const distanceInfo = document.querySelector('#distance-info');
+        if (distanceInfo) {
+            if (nearby) {
+                distanceInfo.classList.add('ghost-nearby');
+            } else {
+                distanceInfo.classList.remove('ghost-nearby');
+            }
+        }
     }
 }
 

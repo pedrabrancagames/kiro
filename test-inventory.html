@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Interface do Inventário</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .test-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #92F428;
+        }
+        .test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .test-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+        .open-btn { background: #4CAF50; }
+        .close-btn { background: #F44336; }
+        .add-btn { background: #2196F3; }
+        .clear-btn { background: #607D8B; }
+        .effect-btn { background: #9C27B0; }
+        
+        .mock-inventory-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #444;
+            border: 2px solid #92F428;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 5;
+        }
+        
+        .mock-inventory-icon:hover {
+            background: #555;
+            transform: scale(1.1);
+        }
+        
+        .status-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📦 Teste da Interface do Inventário</h1>
+        
+        <div class="test-section">
+            <h3>Status do Sistema</h3>
+            <div id="system-status">Carregando...</div>
+            <div class="status-info" id="inventory-status">
+                Estado: fechado | Animando: false | Fantasmas: 0
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Controles Básicos</h3>
+            <div class="test-buttons">
+                <button class="test-button open-btn" onclick="testOpenInventory()">
+                    📂 Abrir Inventário
+                </button>
+                <button class="test-button close-btn" onclick="testCloseInventory()">
+                    ❌ Fechar Inventário
+                </button>
+                <button class="test-button open-btn" onclick="testToggleInventory()">
+                    🔄 Alternar
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Gerenciar Fantasmas</h3>
+            <div class="test-buttons">
+                <button class="test-button add-btn" onclick="testAddCommonGhost()">
+                    👻 Adicionar Comum
+                </button>
+                <button class="test-button add-btn" onclick="testAddRareGhost()">
+                    👹 Adicionar Raro
+                </button>
+                <button class="test-button add-btn" onclick="testAddMultipleGhosts()">
+                    🎭 Adicionar Vários
+                </button>
+                <button class="test-button clear-btn" onclick="testClearGhosts()">
+                    🧹 Limpar Todos
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Efeitos Especiais</h3>
+            <div class="test-buttons">
+                <button class="test-button effect-btn" onclick="testCelebrationEffect()">
+                    🎉 Celebração
+                </button>
+                <button class="test-button effect-btn" onclick="testInventoryFullEffect()">
+                    📦 Inventário Cheio
+                </button>
+                <button class="test-button effect-btn" onclick="testLoadingState()">
+                    ⏳ Estado Loading
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Testes de Integração</h3>
+            <div class="test-buttons">
+                <button class="test-button add-btn" onclick="testFullCapture()">
+                    🎮 Simular Captura
+                </button>
+                <button class="test-button effect-btn" onclick="testInventoryFull()">
+                    🚨 Simular Cheio
+                </button>
+                <button class="test-button clear-btn" onclick="testForceClose()">
+                    🔒 Fechar Forçado
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Log de Eventos</h3>
+            <div id="event-log" style="background: #000; padding: 10px; border-radius: 5px; height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+            </div>
+            <button class="test-button clear-btn" onclick="clearLog()">Limpar Log</button>
+        </div>
+    </div>
+    
+    <!-- Mock do ícone do inventário -->
+    <div class="mock-inventory-icon" onclick="testToggleInventory()">
+        📦
+        <div style="position: absolute; bottom: -5px; right: -5px; background: #ff0000; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;" id="mock-badge">
+            0/5
+        </div>
+    </div>
+    
+    <!-- Elementos necessários para o teste -->
+    <div id="inventory-modal" class="ui-screen ui-element hidden">
+        <div id="inventory-content">
+            <div id="inventory-header">
+                <h2>Inventário de Fantasmas</h2>
+                <button id="close-inventory-button" class="ui-element">&times;</button>
+            </div>
+            <ul id="ghost-list"></ul>
+            <button id="deposit-button" class="action-button ui-element">Depositar Fantasmas</button>
+        </div>
+    </div>
+    
+    <script src="inventory-animations.js"></script>
+    <script>
+        let testGhosts = [];
+        let logCounter = 0;
+        
+        function log(message) {
+            const logElement = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div style="color: #92F428;">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            logCounter++;
+        }
+        
+        function clearLog() {
+            document.getElementById('event-log').innerHTML = '';
+            logCounter = 0;
+        }
+        
+        function updateStatus() {
+            const statusElement = document.getElementById('system-status');
+            const inventoryStatusElement = document.getElementById('inventory-status');
+            const mockBadge = document.getElementById('mock-badge');
+            
+            if (window.inventoryAnimations) {
+                statusElement.innerHTML = '✅ Sistema carregado com sucesso!';
+                statusElement.style.color = '#4CAF50';
+                
+                const isOpen = window.inventoryAnimations.isInventoryOpen();
+                const isAnimating = window.inventoryAnimations.isAnimating;
+                const ghostCount = testGhosts.length;
+                
+                inventoryStatusElement.innerHTML = `Estado: ${isOpen ? 'aberto' : 'fechado'} | Animando: ${isAnimating} | Fantasmas: ${ghostCount}`;
+                mockBadge.textContent = `${ghostCount}/5`;
+                
+                if (ghostCount >= 5) {
+                    mockBadge.style.background = '#ff6b6b';
+                } else {
+                    mockBadge.style.background = '#ff0000';
+                }
+            } else {
+                statusElement.innerHTML = '❌ Sistema não carregado';
+                statusElement.style.color = '#F44336';
+                inventoryStatusElement.innerHTML = 'Sistema não disponível';
+            }
+        }
+        
+        function testOpenInventory() {
+            if (!window.inventoryAnimations) return;
+            log('Abrindo inventário');
+            window.inventoryAnimations.openInventory();
+        }
+        
+        function testCloseInventory() {
+            if (!window.inventoryAnimations) return;
+            log('Fechando inventário');
+            window.inventoryAnimations.closeInventory();
+        }
+        
+        function testToggleInventory() {
+            if (!window.inventoryAnimations) return;
+            
+            if (window.inventoryAnimations.isInventoryOpen()) {
+                testCloseInventory();
+            } else {
+                testOpenInventory();
+            }
+        }
+        
+        function testAddCommonGhost() {
+            const ghost = {
+                id: Date.now(),
+                type: 'Fantasma Comum',
+                points: 10
+            };
+            testGhosts.push(ghost);
+            
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.updateGhostList(testGhosts);
+                window.inventoryAnimations.celebrateNewGhost();
+            }
+            
+            log(`Fantasma comum adicionado (${testGhosts.length} total)`);
+        }
+        
+        function testAddRareGhost() {
+            const ghost = {
+                id: Date.now(),
+                type: 'Fantasma Forte',
+                points: 25
+            };
+            testGhosts.push(ghost);
+            
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.updateGhostList(testGhosts);
+                window.inventoryAnimations.celebrateNewGhost();
+            }
+            
+            log(`Fantasma raro adicionado (${testGhosts.length} total)`);
+        }
+        
+        function testAddMultipleGhosts() {
+            const ghosts = [
+                { id: Date.now() + 1, type: 'Fantasma Comum', points: 10 },
+                { id: Date.now() + 2, type: 'Fantasma Forte', points: 25 },
+                { id: Date.now() + 3, type: 'Fantasma Comum', points: 10 }
+            ];
+            
+            testGhosts.push(...ghosts);
+            
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.updateGhostList(testGhosts);
+            }
+            
+            log(`${ghosts.length} fantasmas adicionados (${testGhosts.length} total)`);
+        }
+        
+        function testClearGhosts() {
+            testGhosts = [];
+            
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.updateGhostList(testGhosts);
+            }
+            
+            log('Todos os fantasmas removidos');
+        }
+        
+        function testCelebrationEffect() {
+            if (!window.inventoryAnimations) return;
+            log('Testando efeito de celebração');
+            window.inventoryAnimations.celebrateNewGhost();
+        }
+        
+        function testInventoryFullEffect() {
+            if (!window.inventoryAnimations) return;
+            log('Testando efeito de inventário cheio');
+            window.inventoryAnimations.showInventoryFullEffect();
+        }
+        
+        function testLoadingState() {
+            if (!window.inventoryAnimations) return;
+            log('Testando estado de loading');
+            
+            const ghostList = document.getElementById('ghost-list');
+            ghostList.innerHTML = '<li class="loading-ghosts">Carregando fantasmas...</li>';
+            
+            setTimeout(() => {
+                window.inventoryAnimations.updateGhostList(testGhosts);
+                log('Loading concluído');
+            }, 2000);
+        }
+        
+        function testFullCapture() {
+            log('🎮 Simulando captura completa de fantasma');
+            
+            // Simular captura
+            setTimeout(() => {
+                testAddCommonGhost();
+                log('👻 Fantasma capturado!');
+            }, 1000);
+        }
+        
+        function testInventoryFull() {
+            log('🚨 Simulando inventário cheio');
+            
+            // Preencher inventário
+            testGhosts = [];
+            for (let i = 0; i < 5; i++) {
+                testGhosts.push({
+                    id: Date.now() + i,
+                    type: i % 2 === 0 ? 'Fantasma Comum' : 'Fantasma Forte',
+                    points: i % 2 === 0 ? 10 : 25
+                });
+            }
+            
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.updateGhostList(testGhosts);
+                window.inventoryAnimations.showInventoryFullEffect();
+            }
+            
+            log('Inventário preenchido e efeito aplicado');
+        }
+        
+        function testForceClose() {
+            if (!window.inventoryAnimations) return;
+            log('Fechamento forçado do inventário');
+            window.inventoryAnimations.forceClose();
+        }
+        
+        // Configurar eventos do modal
+        document.getElementById('close-inventory-button').addEventListener('click', testCloseInventory);
+        
+        // Atualizar status periodicamente
+        setInterval(updateStatus, 500);
+        
+        // Inicializar
+        setTimeout(() => {
+            updateStatus();
+            log('Sistema de teste do inventário inicializado');
+        }, 1000);
+    </script>
+</body>
+</html>

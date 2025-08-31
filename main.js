@@ -159,16 +159,27 @@ AFRAME.registerComponent('game-manager', {
             });
         });
         this.inventoryIconContainer.addEventListener('click', () => {
-            this.inventoryModal.classList.remove('hidden');
-            // Adicionar feedback tátil para abertura de modal
-            if (window.animationManager) {
-                window.animationManager.triggerHapticFeedback('modal_open');
+            // Usar o novo sistema de animações do inventário
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.openInventory();
+            } else {
+                // Fallback para o sistema antigo
+                this.inventoryModal.classList.remove('hidden');
+                if (window.animationManager) {
+                    window.animationManager.triggerHapticFeedback('modal_open');
+                }
             }
         });
         this.closeInventoryButton.addEventListener('click', () => {
-            this.inventoryModal.classList.add('hidden');
-            if (window.animationManager) {
-                window.animationManager.triggerHapticFeedback('button_press');
+            // Usar o novo sistema de animações do inventário
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.closeInventory();
+            } else {
+                // Fallback para o sistema antigo
+                this.inventoryModal.classList.add('hidden');
+                if (window.animationManager) {
+                    window.animationManager.triggerHapticFeedback('button_press');
+                }
             }
         });
         this.depositButton.addEventListener('click', () => {
@@ -263,16 +274,29 @@ AFRAME.registerComponent('game-manager', {
             window.animationManager.setInventoryFullState(this.inventory.length >= this.INVENTORY_LIMIT);
         }
         
-        this.ghostList.innerHTML = '';
+        // Usar o novo sistema de animações do inventário
+        if (window.inventoryAnimations) {
+            window.inventoryAnimations.updateGhostList(this.inventory);
+        } else {
+            // Fallback para o sistema antigo
+            this.ghostList.innerHTML = '';
+            if (this.inventory.length === 0) {
+                this.ghostList.innerHTML = '<li>Inventário vazio.</li>';
+                this.depositButton.style.display = 'none';
+            } else {
+                this.inventory.forEach(ghost => {
+                    const li = document.createElement('li');
+                    li.textContent = `${ghost.type} (Pontos: ${ghost.points}) - ID: ${ghost.id}`;
+                    this.ghostList.appendChild(li);
+                });
+                this.depositButton.style.display = 'block';
+            }
+        }
+        
+        // Mostrar/esconder botão de depósito
         if (this.inventory.length === 0) {
-            this.ghostList.innerHTML = '<li>Inventário vazio.</li>';
             this.depositButton.style.display = 'none';
         } else {
-            this.inventory.forEach(ghost => {
-                const li = document.createElement('li');
-                li.textContent = `${ghost.type} (Pontos: ${ghost.points}) - ID: ${ghost.id}`;
-                this.ghostList.appendChild(li);
-            });
             this.depositButton.style.display = 'block';
         }
     },
@@ -307,7 +331,12 @@ AFRAME.registerComponent('game-manager', {
     },
 
     startQrScanner: async function () {
-        this.inventoryModal.classList.add('hidden');
+        // Fechar inventário com animação
+        if (window.inventoryAnimations) {
+            window.inventoryAnimations.closeInventory();
+        } else {
+            this.inventoryModal.classList.add('hidden');
+        }
 
         if (this.el.sceneEl.is('ar-mode')) {
             try {
@@ -673,6 +702,11 @@ AFRAME.registerComponent('game-manager', {
         this.userStats.points += this.ghostData.points;
         this.userStats.captures += 1;
         this.updateInventoryUI();
+        
+        // Celebração para novo fantasma no inventário
+        if (window.inventoryAnimations) {
+            window.inventoryAnimations.celebrateNewGhost();
+        }
 
         let captureMessage = `Fantasma capturado! Você agora tem ${this.userStats.points} pontos.`;
 
@@ -682,6 +716,10 @@ AFRAME.registerComponent('game-manager', {
             if (window.animationManager) {
                 window.animationManager.inventoryFullHaptics();
                 window.animationManager.setInventoryFullState(true);
+            }
+            // Efeito visual especial no inventário
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.showInventoryFullEffect();
             }
             // Notificação de inventário cheio
             showWarning("Inventário cheio! Encontre uma Unidade de Contenção para depositar os fantasmas.", 6000);

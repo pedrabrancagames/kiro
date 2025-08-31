@@ -365,55 +365,281 @@ body {
     z-index: 20;
 }
 
-/* Modal do Inventário */
+/* ========================================
+   MODAL DO INVENTÁRIO APRIMORADO
+   ======================================== */
+
 #inventory-modal {
     z-index: 30;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    /* Animações de entrada e saída */
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#inventory-modal.show {
+    opacity: 1;
+}
+
+#inventory-modal.hide {
+    opacity: 0;
 }
 
 #inventory-content {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(0.8);
     width: 90%;
-    max-width: 400px;
-    background: #1a1a1a;
+    max-width: 450px;
+    background: linear-gradient(145deg, #1a1a1a 0%, #2a2a2a 100%);
     border: 2px solid #92F428;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 0 20px rgba(146, 244, 40, 0.5);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 
+        0 0 30px rgba(146, 244, 40, 0.6),
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     box-sizing: border-box;
+    /* Animação de entrada */
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+}
+
+#inventory-modal.show #inventory-content {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+#inventory-modal.hide #inventory-content {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
 }
 
 #inventory-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #92F428;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(146, 244, 40, 0.3);
+    margin-bottom: 20px;
+}
+
+#inventory-header h2 {
+    margin: 0;
+    color: #92F428;
+    font-size: 1.4em;
+    text-shadow: 0 0 10px rgba(146, 244, 40, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#inventory-header h2::before {
+    content: '👻';
+    font-size: 1.2em;
+    animation: ghostFloat 2s ease-in-out infinite;
+}
+
+@keyframes ghostFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
 }
 
 #close-inventory-button {
-    background: none;
-    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     font-size: 1.5em;
     cursor: pointer;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#close-inventory-button:hover {
+    background: rgba(255, 107, 107, 0.2);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    transform: scale(1.1);
 }
 
 #ghost-list {
     list-style: none;
     padding: 0;
-    margin-top: 15px;
-    max-height: 200px;
+    margin: 0;
+    max-height: 280px;
     overflow-y: auto;
+    /* Scroll customizado */
+    scrollbar-width: thin;
+    scrollbar-color: #92F428 rgba(255, 255, 255, 0.1);
+}
+
+#ghost-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#ghost-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+#ghost-list::-webkit-scrollbar-thumb {
+    background: #92F428;
+    border-radius: 4px;
+}
+
+#ghost-list::-webkit-scrollbar-thumb:hover {
+    background: #7ED321;
 }
 
 #ghost-list li {
-    padding: 10px;
-    background: #333;
-    border-radius: 5px;
-    margin-bottom: 8px;
+    padding: 15px;
+    background: linear-gradient(135deg, #333 0%, #444 100%);
+    border: 1px solid rgba(146, 244, 40, 0.2);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    /* Animação de entrada */
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: ghostItemSlideIn 0.4s ease-out forwards;
+}
+
+#ghost-list li:nth-child(1) { animation-delay: 0.1s; }
+#ghost-list li:nth-child(2) { animation-delay: 0.2s; }
+#ghost-list li:nth-child(3) { animation-delay: 0.3s; }
+#ghost-list li:nth-child(4) { animation-delay: 0.4s; }
+#ghost-list li:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes ghostItemSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#ghost-list li:hover {
+    background: linear-gradient(135deg, #444 0%, #555 100%);
+    border-color: #92F428;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(146, 244, 40, 0.3);
+}
+
+#ghost-list li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #92F428 0%, #7ED321 100%);
+    border-radius: 0 2px 2px 0;
+}
+
+/* Estilo para item vazio */
+#ghost-list li.empty-state {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(146, 244, 40, 0.3);
+    padding: 30px 15px;
+}
+
+#ghost-list li.empty-state::before {
+    display: none;
+}
+
+/* Melhorias no botão de depósito */
+#deposit-button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #92F428 0%, #7ED321 100%);
+    border: none;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+#deposit-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+#deposit-button:hover::before {
+    left: 100%;
+}
+
+#deposit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(146, 244, 40, 0.4);
+}
+
+#deposit-button:active {
+    transform: translateY(0);
+}
+
+#deposit-button:disabled {
+    background: #555;
+    color: #888;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 480px) {
+    #inventory-content {
+        width: 95%;
+        max-width: none;
+        padding: 20px;
+        border-radius: 15px;
+    }
+    
+    #inventory-header h2 {
+        font-size: 1.2em;
+    }
+    
+    #ghost-list {
+        max-height: 220px;
+    }
+    
+    #ghost-list li {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    #deposit-button {
+        padding: 12px;
+        font-size: 1em;
+    }
 }
 
 /* QR Scanner */
@@ -1424,5 +1650,174 @@ body {
         0%, 100% { transform: translateX(0) translateY(0); }
         25% { transform: translateX(-1px) translateY(-0.5px); }
         75% { transform: translateX(1px) translateY(0.5px); }
+    }
+}/* ====
+====================================
+   EFEITOS ESPECIAIS DO INVENTÁRIO
+   ======================================== */
+
+/* Badge de raridade */
+.rarity-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rarity-badge.common {
+    background: rgba(146, 244, 40, 0.2);
+    color: #92F428;
+    border: 1px solid rgba(146, 244, 40, 0.4);
+}
+
+.rarity-badge.rare {
+    background: rgba(255, 215, 0, 0.2);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    animation: rareBadgeGlow 2s ease-in-out infinite;
+}
+
+@keyframes rareBadgeGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    }
+}
+
+/* Efeito de inventário cheio */
+.inventory-full-pulse {
+    animation: inventoryFullPulse 0.5s ease-in-out 4;
+}
+
+@keyframes inventoryFullPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        border-color: #92F428;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.02);
+        border-color: #FF6B6B;
+        box-shadow: 
+            0 0 40px rgba(255, 107, 107, 0.8),
+            0 10px 40px rgba(0, 0, 0, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Efeito de celebração para novo fantasma */
+.celebration-glow {
+    animation: newGhostCelebration 1s ease-out;
+}
+
+@keyframes newGhostCelebration {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 
+            0 0 30px rgba(146, 244, 40, 0.6),
+            0 10px 40px rgba(0, 0, 0, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 
+            0 0 60px rgba(146, 244, 40, 1),
+            0 15px 50px rgba(0, 0, 0, 0.9),
+            inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 
+            0 0 30px rgba(146, 244, 40, 0.6),
+            0 10px 40px rgba(0, 0, 0, 0.8),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Efeito de hover melhorado para itens */
+#ghost-list li:hover .rarity-badge.rare {
+    animation: rareBadgeGlow 0.5s ease-in-out infinite;
+}
+
+#ghost-list li:hover .rarity-badge.common {
+    box-shadow: 0 0 10px rgba(146, 244, 40, 0.5);
+}
+
+/* Animação para o ícone do fantasma */
+#ghost-list li:hover div[style*="font-size: 2em"] {
+    animation: ghostHover 0.6s ease-in-out infinite;
+}
+
+@keyframes ghostHover {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-2px) rotate(-2deg);
+    }
+    75% {
+        transform: translateY(-1px) rotate(2deg);
+    }
+}
+
+/* Efeito de loading para quando está carregando fantasmas */
+.loading-ghosts {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #92F428;
+}
+
+.loading-ghosts::before {
+    content: '👻';
+    font-size: 2em;
+    animation: loadingFloat 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+@keyframes loadingFloat {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+/* Melhorias no scroll para mobile */
+@media (max-width: 480px) {
+    #ghost-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .rarity-badge {
+        font-size: 0.6em;
+        padding: 3px 6px;
+    }
+    
+    #ghost-list li div[style*="font-size: 2em"] {
+        font-size: 1.5em !important;
+    }
+}
+
+/* Efeito especial para quando não há fantasmas */
+.empty-state {
+    animation: emptyStatePulse 3s ease-in-out infinite;
+}
+
+@keyframes emptyStatePulse {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
     }
 }

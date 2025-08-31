@@ -36,14 +36,17 @@
   - Implementar efeitos visuais aprimorados para o feixe de prótons
   - _Requisitos: 2.1, 4.1, 4.3_
 
-- [-] 5. Melhorar animações da barra de progresso
+- [x] 5. Melhorar animações da barra de progresso
+
+
 
   - Implementar animações fluidas para barra de progresso de captura
   - Adicionar efeitos visuais quando progresso está completo
   - Criar transições suaves para início e cancelamento de captura
   - _Requisitos: 4.2, 4.4, 4.5_
 
-- [ ] 6. Aprimorar interface do inventário
+- [-] 6. Aprimorar interface do inventário
+
   - Adicionar animações de abertura e fechamento suaves para modais
   - Implementar blur effect no fundo quando modal está aberto
   - Melhorar layout visual dos itens no inventário

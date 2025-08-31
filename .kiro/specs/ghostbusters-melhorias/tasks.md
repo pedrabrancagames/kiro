@@ -52,7 +52,10 @@
   - Melhorar layout visual dos itens no inventário
   - _Requisitos: 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 7. Implementar indicadores visuais dinâmicos
+- [x] 7. Implementar indicadores visuais dinâmicos
+
+
+
   - Criar animação pulsante para ícone do inventário quando cheio
   - Adicionar mudanças de cor progressivas no badge do inventário
   - Implementar indicadores visuais para proximidade de fantasmas

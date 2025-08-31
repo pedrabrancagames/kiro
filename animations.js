@@ -377,19 +377,20 @@ class AnimationManager {
     startCaptureHaptics() {
         if (!navigator.vibrate) return;
         
-        // Vibração inicial ao começar captura
+        // Apenas vibração inicial ao começar captura (sem vibração contínua para economizar bateria)
         this.triggerHapticFeedback('capture_start');
         
-        // Vibração contínua durante captura (a cada 500ms)
-        this.captureHapticInterval = setInterval(() => {
-            this.triggerHapticFeedback('capture_progress');
-        }, 500);
+        // Vibração contínua removida para economizar bateria do celular
+        // this.captureHapticInterval = setInterval(() => {
+        //     this.triggerHapticFeedback('capture_progress');
+        // }, 500);
     }
 
     /**
      * Para feedback tátil de captura
      */
     stopCaptureHaptics() {
+        // Método mantido para compatibilidade, mas sem intervalo para limpar
         if (this.captureHapticInterval) {
             clearInterval(this.captureHapticInterval);
             this.captureHapticInterval = null;

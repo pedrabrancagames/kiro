@@ -15,7 +15,7 @@ class AnimationManager {
         this.setupHoverEffects();
         this.setupContextualHaptics();
         this.captureHapticInterval = null;
-        this.createTestButton(); // Botão de teste temporário
+        // this.createTestButton(); // Botão de teste removido
         console.log('Sistema de animações e feedback tátil inicializado');
     }
 
@@ -92,20 +92,15 @@ class AnimationManager {
      */
     addButtonAnimation(element) {
         if (!element || this.isReducedMotion) {
-            console.log('Animação não adicionada:', element, 'Reduced motion:', this.isReducedMotion);
             return;
         }
 
-        console.log('Adicionando animação para:', element);
-
         element.addEventListener('mousedown', () => {
-            console.log('Mouse down - adicionando animate-button-press');
             element.classList.add('animate-button-press');
         });
 
         element.addEventListener('mouseup', () => {
             setTimeout(() => {
-                console.log('Mouse up - removendo animate-button-press');
                 element.classList.remove('animate-button-press');
             }, 150);
         });
@@ -115,15 +110,12 @@ class AnimationManager {
         });
 
         // Suporte para touch
-        element.addEventListener('touchstart', (e) => {
-            console.log('Touch start - adicionando animate-button-press');
+        element.addEventListener('touchstart', () => {
             element.classList.add('animate-button-press');
-            e.preventDefault();
         });
 
         element.addEventListener('touchend', () => {
             setTimeout(() => {
-                console.log('Touch end - removendo animate-button-press');
                 element.classList.remove('animate-button-press');
             }, 150);
         });

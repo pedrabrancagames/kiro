@@ -113,11 +113,19 @@ class VisualEffectsSystem {
      * Loop principal de animação
      */
     animate() {
-        if (!this.isActive) return;
+        if (!this.isActive) {
+            console.log('❌ Animação não ativa, parando...');
+            return;
+        }
 
         this.clearCanvas();
         this.updateParticles();
         this.renderEffects();
+
+        // Log apenas ocasionalmente para não spam
+        if (Math.random() < 0.01) {
+            console.log('🎬 Animando... Partículas:', this.particles.length);
+        }
 
         this.animationFrame = requestAnimationFrame(() => this.animate());
     }
@@ -147,6 +155,11 @@ class VisualEffectsSystem {
      * Renderiza todos os efeitos
      */
     renderEffects() {
+        // Log ocasional para debug
+        if (this.particles.length > 0 && Math.random() < 0.05) {
+            console.log('🎨 Renderizando', this.particles.length, 'partículas');
+        }
+
         // Renderizar partículas
         this.particles.forEach(particle => {
             particle.render(this.ctx);
@@ -165,6 +178,8 @@ class VisualEffectsSystem {
         // Usar centro da tela se não especificado
         if (x === null) x = window.innerWidth / 2;
         if (y === null) y = window.innerHeight / 2;
+
+        console.log('🎉 showCelebrationEffect chamado:', { x, y, type });
 
         const configs = {
             ghost_captured: {
@@ -197,14 +212,18 @@ class VisualEffectsSystem {
         };
 
         const config = configs[type] || configs.ghost_captured;
+        console.log('🎨 Config selecionada:', config);
         
         // Criar partículas
+        const particlesBefore = this.particles.length;
         for (let i = 0; i < config.count; i++) {
             const particle = new CelebrationParticle(x, y, config);
             this.particles.push(particle);
         }
+        console.log('✨ Partículas criadas:', this.particles.length - particlesBefore, 'Total:', this.particles.length);
 
         this.startAnimation();
+        console.log('🎬 Animação iniciada. isActive:', this.isActive);
 
         // Parar animação automaticamente após um tempo
         setTimeout(() => {

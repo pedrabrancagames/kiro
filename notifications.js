@@ -263,22 +263,34 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initNotificationSystem);
 } else {
     // DOM já está pronto
-    initNotificationSystem();
+    setTimeout(initNotificationSystem, 100);
 }
 
 // Também tentar inicializar quando a janela carregar completamente
 window.addEventListener('load', initNotificationSystem);
 
+// Inicializar imediatamente também
+setTimeout(initNotificationSystem, 0);
+
 // Exportar para uso global
 window.NotificationSystem = NotificationSystem;
-// Fun
-ções globais de conveniência para facilitar o uso
+// Funções globais de conveniência para facilitar o uso
 window.showToast = function(message, type = 'info', duration = null) {
+    console.log('showToast chamado:', message, type);
     if (window.notificationSystem) {
+        console.log('NotificationSystem encontrado, mostrando notificação');
         return window.notificationSystem.show(message, type, duration);
     } else {
         console.warn('NotificationSystem não inicializado, usando fallback');
         console.log(`[${type.toUpperCase()}] ${message}`);
+        // Tentar inicializar se não estiver pronto
+        if (typeof NotificationSystem !== 'undefined') {
+            console.log('Tentando inicializar NotificationSystem...');
+            initNotificationSystem();
+            if (window.notificationSystem) {
+                return window.notificationSystem.show(message, type, duration);
+            }
+        }
     }
 };
 

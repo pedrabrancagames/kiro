@@ -979,16 +979,16 @@ AFRAME.registerComponent('game-manager', {
 window.testGhostbustersEffects = function () {
     console.log('🧪 Testando efeitos visuais...');
     console.log('Sistema disponível:', !!window.visualEffectsSystem);
-    
+
     if (window.visualEffectsSystem) {
         // Teste básico de celebração
         console.log('🎉 Testando celebração...');
         window.visualEffectsSystem.showCelebrationEffect(
-            window.innerWidth / 2, 
-            window.innerHeight / 2, 
+            window.innerWidth / 2,
+            window.innerHeight / 2,
             'ghost_captured'
         );
-        
+
         // Teste de sucção
         setTimeout(() => {
             console.log('🌪️ Testando sucção...');
@@ -997,16 +997,16 @@ window.testGhostbustersEffects = function () {
                 window.innerWidth / 2 + 100, window.innerHeight / 2 + 100
             );
         }, 2000);
-        
+
         // Teste de falha
         setTimeout(() => {
             console.log('💥 Testando falha...');
             window.visualEffectsSystem.showCaptureFailEffect(
-                window.innerWidth / 2, 
+                window.innerWidth / 2,
                 window.innerHeight / 2
             );
         }, 4000);
-        
+
         if (window.showSuccess) {
             showSuccess('Efeitos visuais testados! Verifique o console.');
         }

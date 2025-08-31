@@ -9,30 +9,8 @@
 <body style="padding: 20px; background: #222; color: white;">
     <h1>Teste do Sistema de Notificações Toast</h1>
     
-    <div style="margin: 20px 0;">
-        <button onclick="showSuccess('Fantasma capturado com sucesso!')" style="margin: 5px; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Teste Success
-        </button>
-        
-        <button onclick="showError('Erro ao conectar com o servidor!')" style="margin: 5px; padding: 10px; background: #F44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Teste Error
-        </button>
-        
-        <button onclick="showWarning('Inventário cheio! Encontre uma Unidade de Contenção.')" style="margin: 5px; padding: 10px; background: #FF9800; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Teste Warning
-        </button>
-        
-        <button onclick="showInfo('Bem-vindo ao mundo AR! Procure por fantasmas ao seu redor.')" style="margin: 5px; padding: 10px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Teste Info
-        </button>
-        
-        <button onclick="testMultiple()" style="margin: 5px; padding: 10px; background: #9C27B0; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Teste Múltiplas
-        </button>
-        
-        <button onclick="dismissAllToasts()" style="margin: 5px; padding: 10px; background: #607D8B; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Limpar Todas
-        </button>
+    <div style="margin: 20px 0;" id="button-container">
+        <p id="status">Carregando sistema de notificações...</p>
     </div>
 
     <script src="animations.js"></script>
@@ -45,6 +23,56 @@
             setTimeout(() => showWarning('Terceira notificação'), 1000);
             setTimeout(() => showError('Quarta notificação'), 1500);
         }
+        
+        function testNotification() {
+            if (window.notificationSystem) {
+                window.notificationSystem.show('Teste manual funcionando!', 'success');
+            } else {
+                console.error('NotificationSystem não encontrado');
+            }
+        }
+        
+        function createButtons() {
+            const container = document.getElementById('button-container');
+            const status = document.getElementById('status');
+            
+            // Verificar se as funções estão disponíveis
+            if (typeof showSuccess === 'function' && window.notificationSystem) {
+                status.textContent = 'Sistema de notificações carregado com sucesso!';
+                status.style.color = '#4CAF50';
+                
+                const buttons = [
+                    { text: 'Teste Success', onclick: () => showSuccess('Fantasma capturado com sucesso!'), bg: '#4CAF50' },
+                    { text: 'Teste Error', onclick: () => showError('Erro ao conectar com o servidor!'), bg: '#F44336' },
+                    { text: 'Teste Warning', onclick: () => showWarning('Inventário cheio! Encontre uma Unidade de Contenção.'), bg: '#FF9800' },
+                    { text: 'Teste Info', onclick: () => showInfo('Bem-vindo ao mundo AR! Procure por fantasmas ao seu redor.'), bg: '#2196F3' },
+                    { text: 'Teste Múltiplas', onclick: testMultiple, bg: '#9C27B0' },
+                    { text: 'Limpar Todas', onclick: () => dismissAllToasts(), bg: '#607D8B' },
+                    { text: 'Teste Manual', onclick: testNotification, bg: '#795548' }
+                ];
+                
+                buttons.forEach(btn => {
+                    const button = document.createElement('button');
+                    button.textContent = btn.text;
+                    button.onclick = btn.onclick;
+                    button.style.cssText = `margin: 5px; padding: 10px; background: ${btn.bg}; color: white; border: none; border-radius: 5px; cursor: pointer;`;
+                    container.appendChild(button);
+                });
+            } else {
+                status.textContent = 'Erro: Sistema de notificações não carregou. Verifique o console.';
+                status.style.color = '#F44336';
+                console.log('showSuccess:', typeof showSuccess);
+                console.log('notificationSystem:', window.notificationSystem);
+            }
+        }
+        
+        // Tentar criar botões após carregamento
+        window.addEventListener('load', () => {
+            setTimeout(createButtons, 500);
+        });
+        
+        // Também tentar após um tempo
+        setTimeout(createButtons, 2000);
     </script>
 </body>
 </html>

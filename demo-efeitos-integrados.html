@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Efeitos Visuais Integrados no Ghostbusters AR</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .demo-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #92F428;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .demo-button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .celebration { background: linear-gradient(45deg, #4CAF50, #8BC34A); }
+        .suction { background: linear-gradient(45deg, #2196F3, #03DAC6); }
+        .proton { background: linear-gradient(45deg, #92F428, #CDDC39); }
+        .ecto1 { background: linear-gradient(45deg, #FFD700, #FF6347); }
+        .failure { background: linear-gradient(45deg, #F44336, #FF5722); }
+        .clear { background: linear-gradient(45deg, #607D8B, #455A64); }
+        .test { background: linear-gradient(45deg, #9C27B0, #E91E63); }
+        
+        .status-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #92F428;
+        }
+        
+        .code-box {
+            background: #000;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid #333;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            color: #92F428;
+            font-weight: bold;
+        }
+        
+        .mock-game-ui {
+            position: relative;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(146, 244, 40, 0.3);
+            overflow: hidden;
+        }
+        
+        .mock-ghost {
+            font-size: 48px;
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mock-proton-pack {
+            font-size: 36px;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mock-ghost:hover, .mock-proton-pack:hover {
+            transform: scale(1.2);
+        }
+        
+        .mock-proton-pack:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎮 Demo - Efeitos Visuais Integrados no Ghostbusters AR</h1>
+        
+        <div class="status-box">
+            <h3>📊 Status dos Sistemas</h3>
+            <div id="system-status">Carregando sistemas...</div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🎯 Efeitos Principais do Jogo</h2>
+            <p>Estes efeitos são automaticamente ativados durante o gameplay:</p>
+            
+            <div class="demo-grid">
+                <button class="demo-button celebration" onclick="testCaptureSuccess()">
+                    🎉 Captura Bem-sucedida
+                </button>
+                <button class="demo-button failure" onclick="testCaptureFail()">
+                    ❌ Falha na Captura
+                </button>
+                <button class="demo-button suction" onclick="testSuctionEffect()">
+                    🌪️ Efeito de Sucção
+                </button>
+                <button class="demo-button proton" onclick="testProtonBeam()">
+                    ⚡ Feixe de Prótons
+                </button>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🏆 Efeitos Especiais</h2>
+            <p>Efeitos para momentos especiais do jogo:</p>
+            
+            <div class="demo-grid">
+                <button class="demo-button ecto1" onclick="testEcto1Unlock()">
+                    🚗 Desbloqueio Ecto-1
+                </button>
+                <button class="demo-button celebration" onclick="testInventoryFull()">
+                    📦 Inventário Cheio
+                </button>
+                <button class="demo-button celebration" onclick="testNewGhostCelebration()">
+                    👻 Novo Fantasma
+                </button>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🎮 Área de Teste Interativa</h2>
+            <p>Clique no fantasma ou na proton pack para testar interações:</p>
+            
+            <div class="mock-game-ui">
+                <div class="mock-ghost" onclick="testInteractiveGhost()">👻</div>
+                <div class="mock-proton-pack" onclick="testInteractiveProton()">🔫</div>
+                <p style="color: rgba(255,255,255,0.6); margin: 0;">Clique nos elementos para interagir!</p>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🛠️ Controles de Sistema</h2>
+            
+            <div class="demo-grid">
+                <button class="demo-button test" onclick="runFullTest()">
+                    🧪 Teste Completo
+                </button>
+                <button class="demo-button clear" onclick="clearAllEffects()">
+                    🧹 Limpar Efeitos
+                </button>
+                <button class="demo-button test" onclick="testConsoleCommands()">
+                    💻 Comandos Console
+                </button>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>📝 Como Usar no Jogo</h2>
+            
+            <h3>Efeitos Automáticos:</h3>
+            <ul>
+                <li><strong>Captura:</strong> Efeitos de sucção e celebração são ativados automaticamente</li>
+                <li><strong>Falha:</strong> Efeito de erro quando a captura é cancelada</li>
+                <li><strong>Inventário:</strong> Efeitos especiais quando o inventário fica cheio</li>
+                <li><strong>Ecto-1:</strong> Celebração especial ao desbloquear após 5 capturas</li>
+            </ul>
+            
+            <h3>Comandos do Console:</h3>
+            <div class="code-box">
+                <div><span class="highlight">testGhostbustersEffects()</span> - Testa todos os efeitos</div>
+                <div><span class="highlight">clearGhostbustersEffects()</span> - Limpa todos os efeitos</div>
+            </div>
+            
+            <h3>Integração com Outros Sistemas:</h3>
+            <ul>
+                <li><strong>Animações:</strong> Trabalha junto com o sistema de animações</li>
+                <li><strong>Feedback Tátil:</strong> Sincronizado com vibrações</li>
+                <li><strong>Notificações:</strong> Coordenado com mensagens toast</li>
+                <li><strong>Inventário:</strong> Efeitos especiais no modal do inventário</li>
+            </ul>
+        </div>
+        
+        <div class="demo-section">
+            <h2>📊 Log de Eventos</h2>
+            <div id="event-log" class="code-box" style="height: 150px; overflow-y: auto;">
+                Aguardando eventos...
+            </div>
+            <button class="demo-button clear" onclick="clearLog()">Limpar Log</button>
+        </div>
+    </div>
+
+    <!-- Incluir os sistemas necessários -->
+    <script src="animations.js"></script>
+    <script src="notifications.js"></script>
+    <script src="visual-effects.js"></script>
+    <script src="inventory-animations.js"></script>
+    
+    <script>
+        let logCounter = 0;
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#92F428',
+                success: '#4CAF50',
+                error: '#F44336',
+                warning: '#FF9800'
+            };
+            
+            logElement.innerHTML += `<div style="color: ${colors[type] || colors.info};">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            logCounter++;
+        }
+        
+        function clearLog() {
+            document.getElementById('event-log').innerHTML = 'Log limpo...';
+            logCounter = 0;
+        }
+        
+        function updateSystemStatus() {
+            const statusElement = document.getElementById('system-status');
+            const systems = {
+                'Visual Effects': window.visualEffectsSystem,
+                'Animations': window.animationManager,
+                'Notifications': window.notificationSystem,
+                'Inventory': window.inventoryAnimations
+            };
+            
+            let statusHTML = '';
+            let allLoaded = true;
+            
+            for (const [name, system] of Object.entries(systems)) {
+                const loaded = !!system;
+                const icon = loaded ? '✅' : '❌';
+                const color = loaded ? '#4CAF50' : '#F44336';
+                statusHTML += `<div style="color: ${color};">${icon} ${name}: ${loaded ? 'Carregado' : 'Não disponível'}</div>`;
+                if (!loaded) allLoaded = false;
+            }
+            
+            statusElement.innerHTML = statusHTML;
+            
+            if (allLoaded) {
+                log('Todos os sistemas carregados com sucesso!', 'success');
+            }
+        }
+        
+        // Funções de teste dos efeitos
+        function testCaptureSuccess() {
+            if (window.visualEffectsSystem) {
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                
+                // Efeito de sucção primeiro
+                window.visualEffectsSystem.showSuctionEffect(
+                    centerX - 100, centerY - 100,
+                    centerX + 100, centerY + 100
+                );
+                
+                // Celebração após delay
+                setTimeout(() => {
+                    window.visualEffectsSystem.showCelebrationEffect(
+                        centerX, centerY, 'ghost_captured'
+                    );
+                }, 800);
+                
+                showSuccess('Fantasma capturado com sucesso!');
+                log('Efeito de captura bem-sucedida ativado', 'success');
+            }
+        }
+        
+        function testCaptureFail() {
+            if (window.visualEffectsSystem) {
+                window.visualEffectsSystem.showCaptureFailEffect(
+                    window.innerWidth / 2,
+                    window.innerHeight / 2
+                );
+                showError('Captura falhou! O fantasma escapou!');
+                log('Efeito de falha na captura ativado', 'error');
+            }
+        }
+        
+        function testSuctionEffect() {
+            if (window.visualEffectsSystem) {
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                window.visualEffectsSystem.showSuctionEffect(
+                    centerX - 150, centerY - 100,
+                    centerX + 150, centerY + 100
+                );
+                showInfo('Efeito de sucção ativado!');
+                log('Efeito de sucção testado', 'info');
+            }
+        }
+        
+        function testProtonBeam() {
+            if (window.visualEffectsSystem) {
+                window.visualEffectsSystem.startProtonBeamEffect();
+                showWarning('Feixe de prótons ativado!');
+                log('Feixe de prótons iniciado', 'warning');
+                
+                setTimeout(() => {
+                    window.visualEffectsSystem.stopProtonBeamEffect();
+                    showInfo('Feixe de prótons desativado!');
+                    log('Feixe de prótons parado', 'info');
+                }, 3000);
+            }
+        }
+        
+        function testEcto1Unlock() {
+            if (window.visualEffectsSystem) {
+                window.visualEffectsSystem.showCelebrationEffect(
+                    window.innerWidth / 2,
+                    window.innerHeight / 2,
+                    'ecto1_unlocked'
+                );
+                showSuccess('🚗 ECTO-1 DESBLOQUEADO! Efeito especial ativado!', 5000);
+                log('Efeito especial do Ecto-1 ativado', 'success');
+            }
+        }
+        
+        function testInventoryFull() {
+            if (window.visualEffectsSystem) {
+                window.visualEffectsSystem.showCelebrationEffect(
+                    window.innerWidth / 2,
+                    window.innerHeight / 2,
+                    'inventory_full'
+                );
+                showWarning('Inventário cheio! Efeito de aviso ativado!');
+                log('Efeito de inventário cheio ativado', 'warning');
+            }
+        }
+        
+        function testNewGhostCelebration() {
+            if (window.inventoryAnimations) {
+                window.inventoryAnimations.celebrateNewGhost();
+                showSuccess('Novo fantasma adicionado ao inventário!');
+                log('Celebração de novo fantasma ativada', 'success');
+            }
+        }
+        
+        function testInteractiveGhost() {
+            const ghost = document.querySelector('.mock-ghost');
+            ghost.classList.add('suction-effect');
+            
+            setTimeout(() => {
+                ghost.classList.remove('suction-effect');
+                testCaptureSuccess();
+            }, 1000);
+            
+            log('Interação com fantasma simulada', 'info');
+        }
+        
+        function testInteractiveProton() {
+            const proton = document.querySelector('.mock-proton-pack');
+            proton.classList.add('celebration-bounce');
+            
+            setTimeout(() => {
+                proton.classList.remove('celebration-bounce');
+            }, 600);
+            
+            testProtonBeam();
+            log('Interação com proton pack simulada', 'info');
+        }
+        
+        function runFullTest() {
+            log('Iniciando teste completo dos efeitos...', 'info');
+            
+            const tests = [
+                { fn: testCaptureSuccess, delay: 1000, name: 'Captura Sucesso' },
+                { fn: testCaptureFail, delay: 3000, name: 'Captura Falha' },
+                { fn: testSuctionEffect, delay: 5000, name: 'Sucção' },
+                { fn: testProtonBeam, delay: 7000, name: 'Feixe Prótons' },
+                { fn: testEcto1Unlock, delay: 11000, name: 'Ecto-1' },
+                { fn: testInventoryFull, delay: 13000, name: 'Inventário Cheio' }
+            ];
+            
+            tests.forEach(test => {
+                setTimeout(() => {
+                    test.fn();
+                    log(`Teste: ${test.name}`, 'info');
+                }, test.delay);
+            });
+            
+            setTimeout(() => {
+                log('Teste completo finalizado!', 'success');
+            }, 15000);
+        }
+        
+        function clearAllEffects() {
+            if (window.visualEffectsSystem) {
+                window.visualEffectsSystem.clearAllEffects();
+                showInfo('Todos os efeitos foram limpos!');
+                log('Todos os efeitos limpos', 'info');
+            }
+        }
+        
+        function testConsoleCommands() {
+            log('Comandos disponíveis no console:', 'info');
+            log('- testGhostbustersEffects()', 'info');
+            log('- clearGhostbustersEffects()', 'info');
+            
+            showInfo('Verifique o console para comandos disponíveis!');
+            
+            console.log('🎮 Comandos Ghostbusters AR:');
+            console.log('testGhostbustersEffects() - Testa todos os efeitos');
+            console.log('clearGhostbustersEffects() - Limpa todos os efeitos');
+        }
+        
+        // Inicialização
+        setTimeout(() => {
+            updateSystemStatus();
+            log('Demo de efeitos visuais inicializada', 'success');
+        }, 1000);
+        
+        // Atualizar status periodicamente
+        setInterval(updateSystemStatus, 3000);
+    </script>
+</body>
+</html>

@@ -268,12 +268,12 @@ AFRAME.registerComponent('game-manager', {
 
     updateInventoryUI: function () {
         this.inventoryBadge.innerText = `${this.inventory.length}/${this.INVENTORY_LIMIT}`;
-        
+
         // Atualizar estado visual do inventário
         if (window.animationManager) {
             window.animationManager.setInventoryFullState(this.inventory.length >= this.INVENTORY_LIMIT);
         }
-        
+
         // Usar o novo sistema de animações do inventário
         if (window.inventoryAnimations) {
             window.inventoryAnimations.updateGhostList(this.inventory);
@@ -292,7 +292,7 @@ AFRAME.registerComponent('game-manager', {
                 this.depositButton.style.display = 'block';
             }
         }
-        
+
         // Mostrar/esconder botão de depósito
         if (this.inventory.length === 0) {
             this.depositButton.style.display = 'none';
@@ -306,12 +306,12 @@ AFRAME.registerComponent('game-manager', {
         const userRef = ref(this.database, 'users/' + this.currentUser.uid);
         update(userRef, { inventory: this.inventory });
         this.updateInventoryUI();
-        
+
         // Feedback tátil para sucesso do depósito
         if (window.animationManager) {
             window.animationManager.triggerHapticFeedback('success');
         }
-        
+
         showSuccess("Fantasmas depositados com sucesso!");
         this.generateGhost();
     },
@@ -356,7 +356,7 @@ AFRAME.registerComponent('game-manager', {
                 this.gameUi.classList.add('hidden');
                 this.qrScannerScreen.classList.remove('hidden');
             }
-            
+
             this.html5QrCode = new Html5Qrcode("qr-reader");
             this.html5QrCode.start(
                 { facingMode: "environment" },
@@ -418,7 +418,7 @@ AFRAME.registerComponent('game-manager', {
     generateGhost: function () {
         if (this.inventory.length >= this.INVENTORY_LIMIT) {
             this.distanceInfo.innerText = "Inventário Cheio!";
-            if(this.ghostMarker) this.ghostMarker.remove();
+            if (this.ghostMarker) this.ghostMarker.remove();
             return;
         }
         const radius = 0.0001;
@@ -430,15 +430,15 @@ AFRAME.registerComponent('game-manager', {
             points: isStrong ? 25 : 10,
             captureDuration: isStrong ? this.CAPTURE_DURATION_STRONG : this.CAPTURE_DURATION_NORMAL
         };
-        
+
         const iconUrl = isStrong ? 'assets/images/pke_meter.png' : 'assets/images/logo.png';
         const ghostIcon = L.icon({ iconUrl: iconUrl, iconSize: [35, 35] });
-        if(this.ghostMarker) this.ghostMarker.setLatLng([this.ghostData.lat, this.ghostData.lon]).setIcon(ghostIcon);
+        if (this.ghostMarker) this.ghostMarker.setLatLng([this.ghostData.lat, this.ghostData.lon]).setIcon(ghostIcon);
         else this.ghostMarker = L.marker([this.ghostData.lat, this.ghostData.lon], { icon: ghostIcon }).addTo(this.map);
     },
 
     startGps: function () {
-        navigator.geolocation.watchPosition(this.onGpsUpdate, 
+        navigator.geolocation.watchPosition(this.onGpsUpdate,
             () => { showError("Não foi possível obter sua localização."); },
             { enableHighAccuracy: true }
         );
@@ -525,7 +525,7 @@ AFRAME.registerComponent('game-manager', {
         this.isCapturing = true;
         this.protonBeamSound.play();
         this.protonBeamEntity.setAttribute('visible', true); // Mostra o feixe de prótons
-        
+
         // Iniciar feedback tátil de captura e efeito visual
         if (window.animationManager) {
             window.animationManager.startCaptureHaptics();
@@ -563,11 +563,11 @@ AFRAME.registerComponent('game-manager', {
 
         // Usar o novo sistema avançado de animações da barra de progresso
         const duration = this.ghostData.captureDuration;
-        
+
         if (window.progressBarAnimations) {
             // Adicionar efeito visual ao ícone do proton pack
             this.protonPackIcon.classList.add('capturing');
-            
+
             window.progressBarAnimations.startProgress(
                 duration,
                 // Callback de conclusão
@@ -583,7 +583,7 @@ AFRAME.registerComponent('game-manager', {
                     } else if (progress > 80) {
                         this.protonPackProgressBar.classList.add('phase-critical');
                         this.protonPackProgressBar.classList.remove('phase-middle');
-                        
+
                         // Feedback tátil mais intenso na fase crítica
                         if (window.animationManager && Math.random() < 0.3) {
                             window.animationManager.triggerHapticFeedback('medium');
@@ -597,7 +597,7 @@ AFRAME.registerComponent('game-manager', {
             // Fallback para o sistema antigo
             this.protonPackProgressBar.style.display = 'block';
             let startTime = Date.now();
-            
+
             this.progressInterval = setInterval(() => {
                 const elapsedTime = Date.now() - startTime;
                 const progress = Math.min(elapsedTime / duration, 1);
@@ -616,11 +616,11 @@ AFRAME.registerComponent('game-manager', {
         this.protonBeamSound.pause();
         this.protonBeamSound.currentTime = 0;
         this.protonBeamEntity.setAttribute('visible', false); // Esconde o feixe de prótons
-        
+
         // Cancelar timers antigos (fallback)
         clearTimeout(this.captureTimer);
         clearInterval(this.progressInterval);
-        
+
         // Usar o novo sistema de animações se disponível
         if (window.progressBarAnimations) {
             window.progressBarAnimations.cancelProgress();
@@ -629,7 +629,7 @@ AFRAME.registerComponent('game-manager', {
             this.protonPackProgressBar.style.display = 'none';
             this.protonPackProgressFill.style.height = '0%';
         }
-        
+
         // Remover classes visuais
         this.protonPackIcon.classList.remove('capturing');
         this.protonPackProgressBar.classList.remove('phase-start', 'phase-middle', 'phase-critical');
@@ -643,12 +643,28 @@ AFRAME.registerComponent('game-manager', {
         // Parar efeito visual do feixe de prótons
         if (window.visualEffectsSystem) {
             window.visualEffectsSystem.stopProtonBeamEffect();
+
+            // NOVO: Efeito visual de falha na captura
+            if (this.activeGhostEntity) {
+                const ghostPosition = this.getGhostScreenPosition();
+                window.visualEffectsSystem.showCaptureFailEffect(ghostPosition.x, ghostPosition.y);
+            }
         }
 
-        // Remover classe CSS de efeito visual
+        // Remover classe CSS de efeito visual e adicionar efeito de falha
         const protonPackIcon = document.getElementById('proton-pack-icon');
         if (protonPackIcon) {
             protonPackIcon.classList.remove('capturing-glow');
+            // Adicionar efeito visual de falha
+            protonPackIcon.classList.add('capture-fail-shake');
+            setTimeout(() => {
+                protonPackIcon.classList.remove('capture-fail-shake');
+            }, 500);
+        }
+
+        // Feedback tátil de erro
+        if (window.animationManager) {
+            window.animationManager.triggerHapticFeedback('error');
         }
 
         // Retoma as animações do fantasma
@@ -656,12 +672,15 @@ AFRAME.registerComponent('game-manager', {
             this.currentRotatorEntity.components.animation__rotation.play();
             this.currentBobberEntity.components.animation__bob.play();
         }
+
+        // Mostrar mensagem de falha
+        showError("Captura falhou! O fantasma escapou!");
     },
 
     ghostCaptured: function () {
         this.cancelCapture();
         this.ghostCaptureSound.play(); // Som de captura bem-sucedida
-        
+
         // Feedback tátil de sucesso na captura e efeito visual
         if (window.animationManager) {
             window.animationManager.captureSuccessHaptics();
@@ -673,21 +692,21 @@ AFRAME.registerComponent('game-manager', {
             // Efeito de sucção do fantasma para a proton pack
             const ghostPosition = this.getGhostScreenPosition();
             const protonPackPosition = this.getProtonPackScreenPosition();
-            
+
             window.visualEffectsSystem.showSuctionEffect(
                 ghostPosition.x, ghostPosition.y,
                 protonPackPosition.x, protonPackPosition.y
             );
-            
+
             // Efeito de celebração após um pequeno delay
             setTimeout(() => {
                 window.visualEffectsSystem.showCelebrationEffect(
-                    protonPackPosition.x, protonPackPosition.y, 
+                    protonPackPosition.x, protonPackPosition.y,
                     'ghost_captured'
                 );
             }, 500);
         }
-        
+
         if (this.activeGhostEntity) {
             this.activeGhostEntity.setAttribute('visible', false);
         }
@@ -702,7 +721,7 @@ AFRAME.registerComponent('game-manager', {
         this.userStats.points += this.ghostData.points;
         this.userStats.captures += 1;
         this.updateInventoryUI();
-        
+
         // Celebração para novo fantasma no inventário
         if (window.inventoryAnimations) {
             window.inventoryAnimations.celebrateNewGhost();
@@ -728,18 +747,18 @@ AFRAME.registerComponent('game-manager', {
         if (this.userStats.captures >= this.ECTO1_UNLOCK_COUNT && !this.userStats.ecto1Unlocked) {
             this.userStats.ecto1Unlocked = true;
             this.showEcto1OnMap();
-            
+
             // Efeito visual especial para o Ecto-1
             if (window.visualEffectsSystem) {
                 setTimeout(() => {
                     window.visualEffectsSystem.showCelebrationEffect(
-                        window.innerWidth / 2, 
-                        window.innerHeight / 2, 
+                        window.innerWidth / 2,
+                        window.innerHeight / 2,
                         'ecto1_unlocked'
                     );
                 }, 1000);
             }
-            
+
             // Notificação especial para o Ecto-1
             setTimeout(() => {
                 showSuccess("🚗 ECTO-1 DESBLOQUEADO! Você ouve um barulho de motor familiar... Algo especial apareceu no mapa!", 8000);
@@ -765,10 +784,10 @@ AFRAME.registerComponent('game-manager', {
         if (this.activeGhostEntity && this.activeGhostEntity.object3D) {
             const camera = this.el.sceneEl.camera;
             const ghostWorldPosition = this.activeGhostEntity.object3D.position.clone();
-            
+
             // Converter posição 3D para coordenadas de tela
             ghostWorldPosition.project(camera);
-            
+
             x = (ghostWorldPosition.x * 0.5 + 0.5) * window.innerWidth;
             y = (ghostWorldPosition.y * -0.5 + 0.5) * window.innerHeight;
         }
@@ -781,7 +800,7 @@ AFRAME.registerComponent('game-manager', {
      */
     getProtonPackScreenPosition: function () {
         const protonPackIcon = document.getElementById('proton-pack-icon');
-        
+
         if (protonPackIcon) {
             const rect = protonPackIcon.getBoundingClientRect();
             return {
@@ -795,6 +814,78 @@ AFRAME.registerComponent('game-manager', {
             x: window.innerWidth - 80,
             y: window.innerHeight - 80
         };
+    },
+
+    /**
+     * Limpa todos os efeitos visuais ativos
+     */
+    clearAllVisualEffects: function () {
+        if (window.visualEffectsSystem) {
+            window.visualEffectsSystem.clearAllEffects();
+        }
+    },
+
+    /**
+     * Testa efeitos visuais (função de debug)
+     */
+    testVisualEffects: function () {
+        if (!window.visualEffectsSystem) {
+            console.warn('Sistema de efeitos visuais não disponível');
+            return;
+        }
+
+        console.log('Testando efeitos visuais...');
+
+        // Teste de celebração
+        setTimeout(() => {
+            window.visualEffectsSystem.showCelebrationEffect(
+                window.innerWidth / 2,
+                window.innerHeight / 2,
+                'ghost_captured'
+            );
+            showSuccess('Teste: Efeito de celebração');
+        }, 1000);
+
+        // Teste de sucção
+        setTimeout(() => {
+            const ghostPos = this.getGhostScreenPosition();
+            const protonPos = this.getProtonPackScreenPosition();
+            window.visualEffectsSystem.showSuctionEffect(
+                ghostPos.x, ghostPos.y,
+                protonPos.x, protonPos.y
+            );
+            showInfo('Teste: Efeito de sucção');
+        }, 3000);
+
+        // Teste de feixe de prótons
+        setTimeout(() => {
+            window.visualEffectsSystem.startProtonBeamEffect();
+            showWarning('Teste: Feixe de prótons iniciado');
+
+            setTimeout(() => {
+                window.visualEffectsSystem.stopProtonBeamEffect();
+                showInfo('Teste: Feixe de prótons parado');
+            }, 2000);
+        }, 5000);
+
+        // Teste de falha
+        setTimeout(() => {
+            window.visualEffectsSystem.showCaptureFailEffect(
+                window.innerWidth / 2,
+                window.innerHeight / 2
+            );
+            showError('Teste: Efeito de falha na captura');
+        }, 8000);
+
+        // Teste do Ecto-1
+        setTimeout(() => {
+            window.visualEffectsSystem.showCelebrationEffect(
+                window.innerWidth / 2,
+                window.innerHeight / 2,
+                'ecto1_unlocked'
+            );
+            showSuccess('Teste: Efeito especial do Ecto-1');
+        }, 10000);
     },
 
     setupHitTest: async function () {
@@ -817,7 +908,7 @@ AFRAME.registerComponent('game-manager', {
             this.reticle.setAttribute('visible', true);
             this.reticle.object3D.matrix.fromArray(pose.transform.matrix);
             this.reticle.object3D.matrix.decompose(this.reticle.object3D.position, this.reticle.object3D.quaternion, this.reticle.object3D.scale);
-            
+
             // Posicionamento automático
             if (this.objectToPlace && !this.placedObjects[this.objectToPlace]) {
                 this.placeObject();
@@ -872,3 +963,46 @@ AFRAME.registerComponent('game-manager', {
         }
     }
 });
+
+// Função global para testar efeitos visuais (acessível via console)
+window.testGhostbustersEffects = function () {
+    const gameManager = document.querySelector('[game-manager]');
+    if (gameManager && gameManager.components['game-manager']) {
+        gameManager.components['game-manager'].testVisualEffects();
+    } else {
+        console.warn('Game manager não encontrado. Testando efeitos diretamente...');
+
+        if (window.visualEffectsSystem) {
+            // Teste básico de celebração
+            window.visualEffectsSystem.showCelebrationEffect(
+                window.innerWidth / 2,
+                window.innerHeight / 2,
+                'ghost_captured'
+            );
+
+            if (window.showSuccess) {
+                showSuccess('Efeitos visuais testados com sucesso!');
+            }
+        } else {
+            console.error('Sistema de efeitos visuais não disponível');
+        }
+    }
+};
+
+// Função para limpar todos os efeitos (acessível via console)
+window.clearGhostbustersEffects = function () {
+    if (window.visualEffectsSystem) {
+        window.visualEffectsSystem.clearAllEffects();
+        if (window.showInfo) {
+            showInfo('Todos os efeitos visuais foram limpos');
+        }
+        console.log('Efeitos visuais limpos');
+    } else {
+        console.warn('Sistema de efeitos visuais não disponível');
+    }
+};
+
+// Log de inicialização
+console.log('🎮 Ghostbusters AR - Efeitos visuais integrados!');
+console.log('💡 Use testGhostbustersEffects() no console para testar os efeitos');
+console.log('🧹 Use clearGhostbustersEffects() no console para limpar os efeitos');

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Animações da Barra de Progresso</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .test-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #92F428;
+        }
+        .test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .test-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+        .start-btn { background: #4CAF50; }
+        .cancel-btn { background: #F44336; }
+        .reset-btn { background: #607D8B; }
+        .custom-btn { background: #9C27B0; }
+        .info-btn { background: #2196F3; }
+        
+        .progress-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .mock-proton-pack {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: #444;
+            border: 2px solid #92F428;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 Teste das Animações da Barra de Progresso</h1>
+        
+        <div class="test-section">
+            <h3>Status do Sistema</h3>
+            <div id="system-status">Carregando...</div>
+            <div class="progress-info" id="progress-info">
+                Progresso: 0% | Estado: hidden | Animando: false
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Testes Básicos</h3>
+            <div class="test-buttons">
+                <button class="test-button start-btn" onclick="testBasicProgress()">
+                    ▶️ Progresso Básico (3s)
+                </button>
+                <button class="test-button start-btn" onclick="testFastProgress()">
+                    ⚡ Progresso Rápido (1s)
+                </button>
+                <button class="test-button start-btn" onclick="testSlowProgress()">
+                    🐌 Progresso Lento (5s)
+                </button>
+                <button class="test-button cancel-btn" onclick="testCancel()">
+                    ❌ Cancelar
+                </button>
+                <button class="test-button reset-btn" onclick="testReset()">
+                    🔄 Reset
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Testes Avançados</h3>
+            <div class="test-buttons">
+                <button class="test-button custom-btn" onclick="testManualProgress()">
+                    🎛️ Progresso Manual
+                </button>
+                <button class="test-button custom-btn" onclick="testProgressSteps()">
+                    📊 Progresso em Etapas
+                </button>
+                <button class="test-button custom-btn" onclick="testMultipleStarts()">
+                    🔄 Múltiplos Inícios
+                </button>
+                <button class="test-button info-btn" onclick="testProgressInfo()">
+                    ℹ️ Info do Progresso
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Testes de Integração</h3>
+            <div class="test-buttons">
+                <button class="test-button start-btn" onclick="testWithHaptics()">
+                    📳 Com Feedback Tátil
+                </button>
+                <button class="test-button start-btn" onclick="testWithVisualEffects()">
+                    ✨ Com Efeitos Visuais
+                </button>
+                <button class="test-button start-btn" onclick="testFullCapture()">
+                    👻 Simulação Completa
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Log de Eventos</h3>
+            <div id="event-log" style="background: #000; padding: 10px; border-radius: 5px; height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+            </div>
+            <button class="test-button reset-btn" onclick="clearLog()">Limpar Log</button>
+        </div>
+    </div>
+    
+    <!-- Mock do Proton Pack -->
+    <div class="mock-proton-pack" id="mock-proton-pack">⚡</div>
+    
+    <!-- Elementos necessários para o teste -->
+    <div id="proton-pack-progress-bar" class="ui-element">
+        <div id="proton-pack-progress-fill"></div>
+    </div>
+    
+    <script src="progress-bar-animations.js"></script>
+    <script>
+        let logCounter = 0;
+        
+        function log(message) {
+            const logElement = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div style="color: #92F428;">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            logCounter++;
+        }
+        
+        function clearLog() {
+            document.getElementById('event-log').innerHTML = '';
+            logCounter = 0;
+        }
+        
+        function updateStatus() {
+            const statusElement = document.getElementById('system-status');
+            const progressInfoElement = document.getElementById('progress-info');
+            
+            if (window.progressBarAnimations) {
+                statusElement.innerHTML = '✅ Sistema carregado com sucesso!';
+                statusElement.style.color = '#4CAF50';
+                
+                const progress = window.progressBarAnimations.getProgress();
+                const isActive = window.progressBarAnimations.isActive();
+                const state = window.progressBarAnimations.state;
+                
+                progressInfoElement.innerHTML = `Progresso: ${progress.toFixed(1)}% | Estado: ${state} | Animando: ${isActive}`;
+            } else {
+                statusElement.innerHTML = '❌ Sistema não carregado';
+                statusElement.style.color = '#F44336';
+                progressInfoElement.innerHTML = 'Sistema não disponível';
+            }
+        }
+        
+        function testBasicProgress() {
+            if (!window.progressBarAnimations) return;
+            log('Iniciando teste básico de progresso (3s)');
+            
+            window.progressBarAnimations.startProgress(3000, 
+                () => log('✅ Progresso básico concluído'),
+                (progress) => {
+                    if (progress % 25 < 1) {
+                        log(`Progresso: ${progress.toFixed(1)}%`);
+                    }
+                }
+            );
+        }
+        
+        function testFastProgress() {
+            if (!window.progressBarAnimations) return;
+            log('Iniciando teste de progresso rápido (1s)');
+            
+            window.progressBarAnimations.startProgress(1000, 
+                () => log('⚡ Progresso rápido concluído')
+            );
+        }
+        
+        function testSlowProgress() {
+            if (!window.progressBarAnimations) return;
+            log('Iniciando teste de progresso lento (5s)');
+            
+            window.progressBarAnimations.startProgress(5000, 
+                () => log('🐌 Progresso lento concluído')
+            );
+        }
+        
+        function testCancel() {
+            if (!window.progressBarAnimations) return;
+            log('Cancelando progresso atual');
+            window.progressBarAnimations.cancelProgress();
+        }
+        
+        function testReset() {
+            if (!window.progressBarAnimations) return;
+            log('Resetando sistema de progresso');
+            window.progressBarAnimations.reset();
+        }
+        
+        function testManualProgress() {
+            if (!window.progressBarAnimations) return;
+            log('Teste de progresso manual');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                window.progressBarAnimations.setProgress(progress);
+                log(`Progresso manual: ${progress}%`);
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    log('✅ Progresso manual concluído');
+                }
+            }, 500);
+        }
+        
+        function testProgressSteps() {
+            if (!window.progressBarAnimations) return;
+            log('Teste de progresso em etapas');
+            
+            const steps = [0, 25, 50, 75, 100];
+            let currentStep = 0;
+            
+            const nextStep = () => {
+                if (currentStep < steps.length) {
+                    const progress = steps[currentStep];
+                    window.progressBarAnimations.setProgress(progress);
+                    log(`Etapa ${currentStep + 1}: ${progress}%`);
+                    currentStep++;
+                    setTimeout(nextStep, 1000);
+                } else {
+                    log('✅ Progresso em etapas concluído');
+                }
+            };
+            
+            nextStep();
+        }
+        
+        function testMultipleStarts() {
+            if (!window.progressBarAnimations) return;
+            log('Teste de múltiplos inícios');
+            
+            window.progressBarAnimations.startProgress(2000, () => log('Primeiro progresso'));
+            
+            setTimeout(() => {
+                log('Iniciando segundo progresso (deve cancelar o primeiro)');
+                window.progressBarAnimations.startProgress(1500, () => log('Segundo progresso concluído'));
+            }, 500);
+        }
+        
+        function testProgressInfo() {
+            if (!window.progressBarAnimations) return;
+            const progress = window.progressBarAnimations.getProgress();
+            const isActive = window.progressBarAnimations.isActive();
+            const state = window.progressBarAnimations.state;
+            
+            log(`Info: Progresso=${progress.toFixed(1)}%, Ativo=${isActive}, Estado=${state}`);
+        }
+        
+        function testWithHaptics() {
+            if (!window.progressBarAnimations) return;
+            log('Teste com feedback tátil (simulado)');
+            
+            window.progressBarAnimations.startProgress(3000, 
+                () => log('✅ Teste com haptics concluído'),
+                (progress) => {
+                    if (progress > 80 && Math.random() < 0.3) {
+                        log('📳 Feedback tátil simulado');
+                    }
+                }
+            );
+        }
+        
+        function testWithVisualEffects() {
+            if (!window.progressBarAnimations) return;
+            log('Teste com efeitos visuais');
+            
+            const mockIcon = document.getElementById('mock-proton-pack');
+            mockIcon.classList.add('capturing');
+            
+            window.progressBarAnimations.startProgress(3000, 
+                () => {
+                    log('✅ Teste com efeitos visuais concluído');
+                    mockIcon.classList.remove('capturing');
+                }
+            );
+        }
+        
+        function testFullCapture() {
+            if (!window.progressBarAnimations) return;
+            log('🎮 Simulação completa de captura de fantasma');
+            
+            const mockIcon = document.getElementById('mock-proton-pack');
+            mockIcon.classList.add('capturing');
+            
+            window.progressBarAnimations.startProgress(4000, 
+                () => {
+                    log('👻 Fantasma capturado com sucesso!');
+                    mockIcon.classList.remove('capturing');
+                },
+                (progress) => {
+                    if (progress > 25 && progress <= 50) {
+                        log('🎯 Fase inicial da captura');
+                    } else if (progress > 50 && progress <= 80) {
+                        log('⚡ Fase intermediária - aumentando potência');
+                    } else if (progress > 80) {
+                        log('🔥 Fase crítica - quase capturado!');
+                    }
+                }
+            );
+        }
+        
+        // Atualizar status periodicamente
+        setInterval(updateStatus, 500);
+        
+        // Inicializar
+        setTimeout(() => {
+            updateStatus();
+            log('Sistema de teste inicializado');
+        }, 1000);
+    </script>
+</body>
+</html>

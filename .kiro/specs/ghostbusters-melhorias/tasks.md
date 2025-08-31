@@ -18,20 +18,26 @@
   - Integrar vibração para eventos de captura e sucesso
   - _Requisitos: 1.5_
 
-- [-] 3. Desenvolver sistema de notificações toast
+- [x] 3. Desenvolver sistema de notificações toast
+
+
 
   - Criar classe NotificationSystem para gerenciar mensagens
   - Implementar diferentes tipos de toast (success, error, warning, info)
   - Adicionar sistema de fila e auto-dismiss para múltiplas notificações
   - _Requisitos: 3.1, 3.2, 3.3, 3.5_
 
-- [ ] 4. Implementar efeitos visuais de celebração
+- [x] 4. Implementar efeitos visuais de celebração
+
+
+
   - Criar sistema de partículas usando Canvas para celebração de captura
   - Adicionar animações de "sucção" visual quando fantasma é capturado
   - Implementar efeitos visuais aprimorados para o feixe de prótons
   - _Requisitos: 2.1, 4.1, 4.3_
 
-- [ ] 5. Melhorar animações da barra de progresso
+- [-] 5. Melhorar animações da barra de progresso
+
   - Implementar animações fluidas para barra de progresso de captura
   - Adicionar efeitos visuais quando progresso está completo
   - Criar transições suaves para início e cancelamento de captura

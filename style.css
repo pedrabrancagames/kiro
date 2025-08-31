@@ -175,23 +175,163 @@ body {
     top: 50%; /* Centraliza verticalmente */
     transform: translateY(-50%); /* Ajusta para o centro exato */
     right: 0px; /* Mais próximo da borda */
-    width: 10px; /* Vertical */
+    width: 12px; /* Ligeiramente mais largo */
     height: 110px; /* Altura do ícone do proton pack */
-    background-color: rgba(0, 0, 0, 0.5);
-    border: 1px solid #92F428;
-    border-radius: 5px;
+    background: linear-gradient(180deg, 
+        rgba(0, 0, 0, 0.8) 0%, 
+        rgba(20, 20, 20, 0.9) 50%, 
+        rgba(0, 0, 0, 0.8) 100%);
+    border: 2px solid #92F428;
+    border-radius: 8px;
     overflow: hidden;
     display: none; /* Escondido por padrão */
     z-index: 16; /* Acima do ícone */
+    box-shadow: 
+        0 0 10px rgba(146, 244, 40, 0.3),
+        inset 0 0 5px rgba(0, 0, 0, 0.5);
+    /* Animações de entrada e saída */
+    opacity: 0;
+    transform: translateY(-50%) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+#proton-pack-progress-bar.show {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+#proton-pack-progress-bar.hide {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.8);
+}
+
 #proton-pack-progress-fill {
-    width: 100%; /* Preenche a largura */
-    height: 0%; /* Começa vazio na vertical */
-    background-color: #92F428;
-    transition: height 0.1s linear; /* Transição na altura */
-    position: absolute; /* Para preencher de baixo para cima */
-    bottom: 0; /* Preenche de baixo para cima */
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(180deg, 
+        #92F428 0%, 
+        #7ED321 30%, 
+        #50E3C2 60%, 
+        #00FFFF  100%);
+    position: absolute;
+    bottom: 0;
     left: 0;
+    border-radius: 4px;
+    /* Animação suave do progresso */
+    transition: height 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Efeito de brilho */
+    box-shadow: 
+        0 0 8px rgba(146, 244, 40, 0.6),
+        inset 0 0 4px rgba(255, 255, 255, 0.3);
+    /* Animação de pulso quando ativo */
+    animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* Animação de pulso para a barra de progresso */
+@keyframes progressPulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 8px rgba(146, 244, 40, 0.6),
+            inset 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 0 15px rgba(146, 244, 40, 0.9),
+            inset 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+}
+
+/* Estados especiais da barra de progresso */
+#proton-pack-progress-fill.critical {
+    background: linear-gradient(180deg, 
+        #FF6B6B 0%, 
+        #FF4757 30%, 
+        #FF3742 60%, 
+        #FF2D2D 100%);
+    animation: criticalPulse 0.5s ease-in-out infinite;
+}
+
+#proton-pack-progress-fill.success {
+    background: linear-gradient(180deg, 
+        #4CAF50 0%, 
+        #45A049 30%, 
+        #3E8E41 60%, 
+        #2E7D32 100%);
+    animation: successGlow 0.8s ease-in-out;
+}
+
+@keyframes criticalPulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 10px rgba(255, 107, 107, 0.8),
+            inset 0 0 6px rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 
+            0 0 20px rgba(255, 107, 107, 1),
+            inset 0 0 12px rgba(255, 255, 255, 0.7);
+    }
+}
+
+@keyframes successGlow {
+    0% {
+        box-shadow: 
+            0 0 8px rgba(76, 175, 80, 0.6),
+            inset 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 0 25px rgba(76, 175, 80, 1),
+            inset 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        box-shadow: 
+            0 0 8px rgba(76, 175, 80, 0.6),
+            inset 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Efeito de ondulação na barra */
+#proton-pack-progress-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent 100%);
+    transform: translateX(-100%);
+    animation: progressWave 2s linear infinite;
+}
+
+@keyframes progressWave {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Indicadores de segmentos na barra */
+#proton-pack-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 8px,
+        rgba(146, 244, 40, 0.2) 8px,
+        rgba(146, 244, 40, 0.2) 10px
+    );
+    pointer-events: none;
 }
 
 #capture-button {
@@ -902,4 +1042,387 @@ body {
 
 .toast.toast-removing:hover {
     transform: translateX(100%);
+}/* =
+=======================================
+   SISTEMA DE EFEITOS VISUAIS
+   ======================================== */
+
+/* Canvas para efeitos visuais */
+.visual-effects-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* Efeitos especiais para elementos durante captura */
+.capturing-glow {
+    animation: capturingGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes capturingGlow {
+    0% {
+        box-shadow: 0 0 10px rgba(146, 244, 40, 0.5);
+        filter: brightness(1);
+    }
+    100% {
+        box-shadow: 0 0 30px rgba(146, 244, 40, 0.8);
+        filter: brightness(1.2);
+    }
+}
+
+/* Efeito de sucção visual */
+.suction-effect {
+    animation: suctionPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes suctionPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(0.9);
+        opacity: 0.7;
+    }
+}
+
+/* Efeito de celebração para elementos */
+.celebration-bounce {
+    animation: celebrationBounce 0.6s ease-out;
+}
+
+@keyframes celebrationBounce {
+    0% {
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.2);
+    }
+    60% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Efeito de falha */
+.capture-fail-shake {
+    animation: captureFailShake 0.5s ease-in-out;
+}
+
+@keyframes captureFailShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+/* Efeito de brilho intenso para momentos especiais */
+.intense-glow {
+    animation: intenseGlow 2s ease-in-out;
+}
+
+@keyframes intenseGlow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(146, 244, 40, 0.5);
+        filter: brightness(1);
+    }
+    50% {
+        box-shadow: 0 0 50px rgba(146, 244, 40, 1), 
+                    0 0 100px rgba(146, 244, 40, 0.5);
+        filter: brightness(1.5);
+    }
+}
+
+/* Overlay para efeitos de tela cheia */
+.screen-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 150;
+    opacity: 0;
+}
+
+.screen-flash.success {
+    background: radial-gradient(circle, rgba(146, 244, 40, 0.3) 0%, transparent 70%);
+    animation: successFlash 0.5s ease-out;
+}
+
+.screen-flash.failure {
+    background: radial-gradient(circle, rgba(244, 67, 54, 0.3) 0%, transparent 70%);
+    animation: failureFlash 0.5s ease-out;
+}
+
+@keyframes successFlash {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes failureFlash {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Efeitos para o feixe de prótons */
+.proton-beam-active {
+    position: relative;
+}
+
+.proton-beam-active::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 200px;
+    background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgba(146, 244, 40, 0.8) 20%, 
+        rgba(146, 244, 40, 1) 50%, 
+        rgba(146, 244, 40, 0.8) 80%, 
+        transparent 100%);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px rgba(146, 244, 40, 0.8);
+    animation: protonBeamPulse 0.1s ease-in-out infinite alternate;
+    z-index: 10;
+}
+
+@keyframes protonBeamPulse {
+    0% {
+        opacity: 0.7;
+        width: 4px;
+    }
+    100% {
+        opacity: 1;
+        width: 6px;
+    }
+}
+
+/* Responsividade para efeitos visuais */
+@media (max-width: 480px) {
+    .visual-effects-canvas {
+        /* Reduzir qualidade em dispositivos móveis para performance */
+        image-rendering: pixelated;
+    }
+    
+    .proton-beam-active::before {
+        height: 150px;
+        width: 3px;
+    }
+    
+    @keyframes protonBeamPulse {
+        0% {
+            opacity: 0.7;
+            width: 3px;
+        }
+        100% {
+            opacity: 1;
+            width: 4px;
+        }
+    }
+}
+
+/* Efeitos de partículas CSS para fallback */
+.css-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #92F428;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 120;
+}
+
+.css-particle.celebration {
+    animation: cssParticleCelebration 2s ease-out forwards;
+}
+
+@keyframes cssParticleCelebration {
+    0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-100px);
+    }
+}/
+* ========================================
+   ANIMAÇÕES ESPECIAIS DA BARRA DE PROGRESSO
+   ======================================== */
+
+/* Animação de shake para estado crítico */
+.critical-shake {
+    animation: criticalShake 0.1s ease-in-out infinite;
+}
+
+@keyframes criticalShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}
+
+/* Animação de shake para o ícone do proton pack durante captura */
+.capture-shake {
+    animation: captureShake 0.6s ease-in-out;
+}
+
+@keyframes captureShake {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    10% { transform: translateX(-2px) translateY(-1px); }
+    20% { transform: translateX(2px) translateY(1px); }
+    30% { transform: translateX(-1px) translateY(-2px); }
+    40% { transform: translateX(1px) translateY(2px); }
+    50% { transform: translateX(-2px) translateY(1px); }
+    60% { transform: translateX(2px) translateY(-1px); }
+    70% { transform: translateX(-1px) translateY(2px); }
+    80% { transform: translateX(1px) translateY(-2px); }
+    90% { transform: translateX(-1px) translateY(1px); }
+}
+
+/* Efeito de glow pulsante para o proton pack durante captura */
+#proton-pack-icon.capturing {
+    animation: protonPackGlow 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px #92F428);
+}
+
+@keyframes protonPackGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px #92F428) brightness(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 20px #92F428) brightness(1.2);
+    }
+}
+
+/* Animação de entrada suave para a barra de progresso */
+@keyframes progressBarEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.5) translateX(20px);
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateY(-50%) scale(1.1) translateX(-5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1) translateX(0);
+    }
+}
+
+/* Animação de saída suave para a barra de progresso */
+@keyframes progressBarExit {
+    0% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1) translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.8) translateX(20px);
+    }
+}
+
+/* Estados especiais para diferentes fases da captura */
+#proton-pack-progress-bar.phase-start {
+    border-color: #92F428;
+    box-shadow: 0 0 15px rgba(146, 244, 40, 0.5);
+}
+
+#proton-pack-progress-bar.phase-middle {
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+#proton-pack-progress-bar.phase-critical {
+    border-color: #FF6B6B;
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.7);
+    animation: criticalBorder 0.3s ease-in-out infinite;
+}
+
+@keyframes criticalBorder {
+    0%, 100% {
+        border-color: #FF6B6B;
+        box-shadow: 0 0 15px rgba(255, 107, 107, 0.7);
+    }
+    50% {
+        border-color: #FF4757;
+        box-shadow: 0 0 25px rgba(255, 107, 107, 1);
+    }
+}
+
+/* Efeito de partículas na barra de progresso */
+#proton-pack-progress-bar::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        transparent 30%, 
+        rgba(146, 244, 40, 0.1) 50%, 
+        transparent 70%);
+    border-radius: 10px;
+    opacity: 0;
+    animation: particleEffect 3s linear infinite;
+}
+
+@keyframes particleEffect {
+    0% {
+        opacity: 0;
+        transform: rotate(0deg);
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 480px) {
+    #proton-pack-progress-bar {
+        width: 8px;
+        height: 80px;
+    }
+    
+    .capture-shake {
+        animation-duration: 0.4s;
+    }
+    
+    @keyframes captureShake {
+        0%, 100% { transform: translateX(0) translateY(0); }
+        25% { transform: translateX(-1px) translateY(-0.5px); }
+        75% { transform: translateX(1px) translateY(0.5px); }
+    }
 }

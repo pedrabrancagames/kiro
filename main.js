@@ -503,6 +503,17 @@ AFRAME.registerComponent('game-manager', {
             window.animationManager.setCapturingState(true);
         }
 
+        // Iniciar efeito visual do feixe de prótons
+        if (window.visualEffectsSystem) {
+            window.visualEffectsSystem.startProtonBeamEffect();
+        }
+
+        // Adicionar classe CSS para efeito visual adicional
+        const protonPackIcon = document.getElementById('proton-pack-icon');
+        if (protonPackIcon) {
+            protonPackIcon.classList.add('capturing-glow');
+        }
+
         // Define os pontos de início e fim do feixe em coordenadas relativas à câmera
         const startPoint = new THREE.Vector3(0.15, -0.4, -0.5); // Ponta da pistola
         const endPoint = new THREE.Vector3(0, 0, -10); // Centro da tela, 10m de distância
@@ -521,19 +532,53 @@ AFRAME.registerComponent('game-manager', {
         const quaternion = new THREE.Quaternion().setFromUnitVectors(cylinderUp, beamVector.normalize());
         this.protonBeamEntity.object3D.quaternion.copy(quaternion);
 
-        this.protonPackProgressBar.style.display = 'block';
-        let startTime = Date.now();
-
+        // Usar o novo sistema avançado de animações da barra de progresso
         const duration = this.ghostData.captureDuration;
-        this.progressInterval = setInterval(() => {
-            const elapsedTime = Date.now() - startTime;
-            const progress = Math.min(elapsedTime / duration, 1);
-            this.protonPackProgressFill.style.height = `${progress * 100}%`;
-        }, 100);
+        
+        if (window.progressBarAnimations) {
+            // Adicionar efeito visual ao ícone do proton pack
+            this.protonPackIcon.classList.add('capturing');
+            
+            window.progressBarAnimations.startProgress(
+                duration,
+                // Callback de conclusão
+                () => {
+                    this.ghostCaptured();
+                },
+                // Callback de atualização
+                (progress, normalizedProgress) => {
+                    // Efeitos especiais baseados no progresso
+                    if (progress > 50 && progress <= 80) {
+                        this.protonPackProgressBar.classList.add('phase-middle');
+                        this.protonPackProgressBar.classList.remove('phase-start');
+                    } else if (progress > 80) {
+                        this.protonPackProgressBar.classList.add('phase-critical');
+                        this.protonPackProgressBar.classList.remove('phase-middle');
+                        
+                        // Feedback tátil mais intenso na fase crítica
+                        if (window.animationManager && Math.random() < 0.3) {
+                            window.animationManager.triggerHapticFeedback('medium');
+                        }
+                    } else {
+                        this.protonPackProgressBar.classList.add('phase-start');
+                    }
+                }
+            );
+        } else {
+            // Fallback para o sistema antigo
+            this.protonPackProgressBar.style.display = 'block';
+            let startTime = Date.now();
+            
+            this.progressInterval = setInterval(() => {
+                const elapsedTime = Date.now() - startTime;
+                const progress = Math.min(elapsedTime / duration, 1);
+                this.protonPackProgressFill.style.height = `${progress * 100}%`;
+            }, 100);
 
-        this.captureTimer = setTimeout(() => {
-            this.ghostCaptured();
-        }, duration);
+            this.captureTimer = setTimeout(() => {
+                this.ghostCaptured();
+            }, duration);
+        }
     },
 
     cancelCapture: function () {
@@ -542,15 +587,39 @@ AFRAME.registerComponent('game-manager', {
         this.protonBeamSound.pause();
         this.protonBeamSound.currentTime = 0;
         this.protonBeamEntity.setAttribute('visible', false); // Esconde o feixe de prótons
+        
+        // Cancelar timers antigos (fallback)
         clearTimeout(this.captureTimer);
         clearInterval(this.progressInterval);
-        this.protonPackProgressBar.style.display = 'none';
-        this.protonPackProgressFill.style.height = '0%';
+        
+        // Usar o novo sistema de animações se disponível
+        if (window.progressBarAnimations) {
+            window.progressBarAnimations.cancelProgress();
+        } else {
+            // Fallback para o sistema antigo
+            this.protonPackProgressBar.style.display = 'none';
+            this.protonPackProgressFill.style.height = '0%';
+        }
+        
+        // Remover classes visuais
+        this.protonPackIcon.classList.remove('capturing');
+        this.protonPackProgressBar.classList.remove('phase-start', 'phase-middle', 'phase-critical');
 
         // Parar feedback tátil de captura e efeito visual
         if (window.animationManager) {
             window.animationManager.stopCaptureHaptics();
             window.animationManager.setCapturingState(false);
+        }
+
+        // Parar efeito visual do feixe de prótons
+        if (window.visualEffectsSystem) {
+            window.visualEffectsSystem.stopProtonBeamEffect();
+        }
+
+        // Remover classe CSS de efeito visual
+        const protonPackIcon = document.getElementById('proton-pack-icon');
+        if (protonPackIcon) {
+            protonPackIcon.classList.remove('capturing-glow');
         }
 
         // Retoma as animações do fantasma
@@ -568,6 +637,26 @@ AFRAME.registerComponent('game-manager', {
         if (window.animationManager) {
             window.animationManager.captureSuccessHaptics();
             window.animationManager.addHapticSuccessEffect('#proton-pack-icon');
+        }
+
+        // Efeitos visuais de celebração e sucção
+        if (window.visualEffectsSystem) {
+            // Efeito de sucção do fantasma para a proton pack
+            const ghostPosition = this.getGhostScreenPosition();
+            const protonPackPosition = this.getProtonPackScreenPosition();
+            
+            window.visualEffectsSystem.showSuctionEffect(
+                ghostPosition.x, ghostPosition.y,
+                protonPackPosition.x, protonPackPosition.y
+            );
+            
+            // Efeito de celebração após um pequeno delay
+            setTimeout(() => {
+                window.visualEffectsSystem.showCelebrationEffect(
+                    protonPackPosition.x, protonPackPosition.y, 
+                    'ghost_captured'
+                );
+            }, 500);
         }
         
         if (this.activeGhostEntity) {
@@ -601,6 +690,18 @@ AFRAME.registerComponent('game-manager', {
         if (this.userStats.captures >= this.ECTO1_UNLOCK_COUNT && !this.userStats.ecto1Unlocked) {
             this.userStats.ecto1Unlocked = true;
             this.showEcto1OnMap();
+            
+            // Efeito visual especial para o Ecto-1
+            if (window.visualEffectsSystem) {
+                setTimeout(() => {
+                    window.visualEffectsSystem.showCelebrationEffect(
+                        window.innerWidth / 2, 
+                        window.innerHeight / 2, 
+                        'ecto1_unlocked'
+                    );
+                }, 1000);
+            }
+            
             // Notificação especial para o Ecto-1
             setTimeout(() => {
                 showSuccess("🚗 ECTO-1 DESBLOQUEADO! Você ouve um barulho de motor familiar... Algo especial apareceu no mapa!", 8000);
@@ -612,6 +713,50 @@ AFRAME.registerComponent('game-manager', {
 
         showSuccess(captureMessage);
         this.generateGhost();
+    },
+
+    /**
+     * Obtém a posição do fantasma na tela
+     */
+    getGhostScreenPosition: function () {
+        // Posição padrão no centro da tela se não conseguir obter a posição real
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight / 2;
+
+        // Tentar obter posição real do fantasma se disponível
+        if (this.activeGhostEntity && this.activeGhostEntity.object3D) {
+            const camera = this.el.sceneEl.camera;
+            const ghostWorldPosition = this.activeGhostEntity.object3D.position.clone();
+            
+            // Converter posição 3D para coordenadas de tela
+            ghostWorldPosition.project(camera);
+            
+            x = (ghostWorldPosition.x * 0.5 + 0.5) * window.innerWidth;
+            y = (ghostWorldPosition.y * -0.5 + 0.5) * window.innerHeight;
+        }
+
+        return { x, y };
+    },
+
+    /**
+     * Obtém a posição da proton pack na tela
+     */
+    getProtonPackScreenPosition: function () {
+        const protonPackIcon = document.getElementById('proton-pack-icon');
+        
+        if (protonPackIcon) {
+            const rect = protonPackIcon.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+        }
+
+        // Posição padrão no canto inferior direito
+        return {
+            x: window.innerWidth - 80,
+            y: window.innerHeight - 80
+        };
     },
 
     setupHitTest: async function () {

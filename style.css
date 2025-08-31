@@ -1,0 +1,613 @@
+/* Estilos Gerais */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background-color: #000;
+    color: #fff;
+}
+
+/* Contêiner principal da UI que permite cliques passarem por ele */
+#ui-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.ui-element {
+    pointer-events: auto; /* Elementos com esta classe são clicáveis */
+}
+
+.ui-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease-out;
+    padding: 20px;
+    box-sizing: border-box;
+    pointer-events: auto; /* Telas cheias devem ser clicáveis */
+}
+
+.hidden {
+    display: none !important; /* Regra forte para garantir que o elemento seja escondido */
+}
+
+#logo {
+    width: 80%;
+    max-width: 350px;
+    margin-bottom: 40px;
+}
+
+#loading-info, #location-info-text, #distance-info {
+    font-size: 1em;
+    color: #ccc;
+    text-align: center;
+    margin-top: 20px;
+    height: 20px;
+}
+
+.action-button {
+    display: none; 
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+#google-login-button {
+    background-color: #4285F4;
+    color: #fff;
+}
+        
+#enter-button, #deposit-button {
+    color: #000;
+    background-color: #92F428;
+}
+
+#enter-button:disabled {
+    background-color: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+
+/* Tela de Seleção de Local */
+#location-buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 350px;
+}
+
+.location-button {
+    padding: 15px;
+    background-color: #333;
+    border: 2px solid #555;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.location-button.selected {
+    border-color: #92F428;
+    background-color: rgba(146, 244, 40, 0.2);
+    transform: scale(1.05);
+}
+
+/* UI Principal do Jogo */
+#game-ui {
+    pointer-events: none; /* O container em si não é clicável */
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+#game-logo {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 60px;
+    z-index: 15;
+    opacity: 0.8;
+}
+
+#inventory-icon-container {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 25;
+    cursor: pointer;
+}
+
+#inventory-icon {
+    width: 115px; /* Aumentado */
+}
+
+#inventory-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 0px;
+    background-color: #ff0000;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    border: 2px solid white;
+}
+
+#proton-pack-icon {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    width: 140px; /* Aumentado */
+    z-index: 15;
+    pointer-events: auto; /* Agora é clicável */
+}
+
+#proton-pack-progress-bar {
+    position: fixed;
+    top: 50%; /* Centraliza verticalmente */
+    transform: translateY(-50%); /* Ajusta para o centro exato */
+    right: 0px; /* Mais próximo da borda */
+    width: 10px; /* Vertical */
+    height: 110px; /* Altura do ícone do proton pack */
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid #92F428;
+    border-radius: 5px;
+    overflow: hidden;
+    display: none; /* Escondido por padrão */
+    z-index: 16; /* Acima do ícone */
+}
+#proton-pack-progress-fill {
+    width: 100%; /* Preenche a largura */
+    height: 0%; /* Começa vazio na vertical */
+    background-color: #92F428;
+    transition: height 0.1s linear; /* Transição na altura */
+    position: absolute; /* Para preencher de baixo para cima */
+    bottom: 0; /* Preenche de baixo para cima */
+    left: 0;
+}
+
+#capture-button {
+    /* Este botão foi removido do HTML */
+    display: none;
+}
+
+#minimap {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 150px;
+    height: 150px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid #92F428;
+    border-radius: 50%;
+    z-index: 20;
+    box-shadow: 0 0 15px rgba(146, 244, 40, 0.5);
+    overflow: hidden;
+}
+
+#distance-info {
+    position: fixed;
+    bottom: 180px;
+    left: 20px;
+    background-color: rgba(0,0,0,0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #92F428;
+    font-weight: bold;
+    z-index: 20;
+}
+
+/* Modal do Inventário */
+#inventory-modal {
+    z-index: 30;
+}
+
+#inventory-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px;
+    background: #1a1a1a;
+    border: 2px solid #92F428;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(146, 244, 40, 0.5);
+    box-sizing: border-box;
+}
+
+#inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #92F428;
+}
+
+#close-inventory-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+#ghost-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#ghost-list li {
+    padding: 10px;
+    background: #333;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+/* QR Scanner */
+#qr-scanner-screen {
+    background-color: #222;
+    z-index: 40;
+}
+#qr-reader {
+    width: 90%;
+    max-width: 500px;
+    border: 4px dashed #92F428;
+    border-radius: 10px;
+}
+#close-scanner-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 2em;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Janela de Notificação */
+#notification-modal {
+    z-index: 200; /* Garante que fique sobre todos os outros elementos */
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+#notification-content {
+    width: 90%;
+    max-width: 400px;
+    background: #1a1a1a;
+    border: 2px solid #92F428;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 0 20px rgba(146, 244, 40, 0.5);
+    text-align: center;
+}
+
+#notification-message {
+    margin: 0;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    line-height: 1.5;
+    white-space: pre-wrap; /* Para preservar quebras de linha */
+}
+
+#notification-close-button {
+    display: inline-block; /* Para que o botão apareça */
+    color: #000;
+    background-color: #92F428;
+}
+
+.a-enter-vr-button,
+.a-enter-ar-button {
+    display: none !important;
+}
+
+/* ========================================
+   SISTEMA DE ANIMAÇÕES E TRANSIÇÕES
+   ======================================== */
+
+/* Keyframes para animações de botões */
+@keyframes buttonPress {
+    0% { 
+        transform: scale(1); 
+        filter: brightness(1);
+    }
+    50% { 
+        transform: scale(0.95); 
+        filter: brightness(1.2);
+    }
+    100% { 
+        transform: scale(1); 
+        filter: brightness(1);
+    }
+}
+
+@keyframes buttonHover {
+    0% { 
+        transform: scale(1); 
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    100% { 
+        transform: scale(1.05); 
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Keyframes para modais */
+@keyframes modalFadeIn {
+    0% { 
+        opacity: 0; 
+        transform: scale(0.8) translateY(20px);
+        backdrop-filter: blur(0px);
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1) translateY(0);
+        backdrop-filter: blur(10px);
+    }
+}
+
+@keyframes modalFadeOut {
+    0% { 
+        opacity: 1; 
+        transform: scale(1) translateY(0);
+        backdrop-filter: blur(10px);
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(0.8) translateY(20px);
+        backdrop-filter: blur(0px);
+    }
+}
+
+/* Keyframes para transições de tela */
+@keyframes slideInFromRight {
+    0% { 
+        opacity: 0; 
+        transform: translateX(100%);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutToLeft {
+    0% { 
+        opacity: 1; 
+        transform: translateX(0);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes fadeIn {
+    0% { 
+        opacity: 0; 
+        transform: translateY(10px);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    0% { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateY(-10px);
+    }
+}
+
+/* Keyframes para elementos pulsantes */
+@keyframes pulse {
+    0% { 
+        transform: scale(1); 
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.1); 
+        opacity: 0.8;
+    }
+    100% { 
+        transform: scale(1); 
+        opacity: 1;
+    }
+}
+
+@keyframes glow {
+    0% { 
+        box-shadow: 0 0 5px rgba(146, 244, 40, 0.5);
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(146, 244, 40, 0.8);
+    }
+    100% { 
+        box-shadow: 0 0 5px rgba(146, 244, 40, 0.5);
+    }
+}
+
+/* Classes de animação para aplicar via JavaScript */
+.animate-button-press {
+    animation: buttonPress 0.15s ease-out;
+}
+
+.animate-button-hover {
+    animation: buttonHover 0.2s ease-out forwards;
+}
+
+.animate-modal-in {
+    animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+.animate-modal-out {
+    animation: modalFadeOut 0.3s ease-out forwards;
+}
+
+.animate-slide-in {
+    animation: slideInFromRight 0.4s ease-out forwards;
+}
+
+.animate-slide-out {
+    animation: slideOutToLeft 0.4s ease-out forwards;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+.animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Transições suaves para mudanças de estado */
+.smooth-transition {
+    transition: all 0.3s ease-out;
+}
+
+.smooth-transition-fast {
+    transition: all 0.15s ease-out;
+}
+
+.smooth-transition-slow {
+    transition: all 0.5s ease-out;
+}
+
+/* Melhorias nos botões existentes */
+.action-button {
+    transition: all 0.2s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.action-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.location-button {
+    transition: all 0.3s ease-out;
+}
+
+.location-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(146, 244, 40, 0.3);
+}
+
+/* Melhorias nos elementos interativos */
+#inventory-icon-container {
+    transition: all 0.2s ease-out;
+}
+
+#inventory-icon-container:hover {
+    transform: scale(1.1);
+}
+
+#inventory-icon-container:active {
+    transform: scale(0.95);
+}
+
+#proton-pack-icon {
+    transition: all 0.2s ease-out;
+}
+
+#proton-pack-icon:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+#proton-pack-icon:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+}
+
+#close-inventory-button,
+#close-scanner-button {
+    transition: all 0.2s ease-out;
+}
+
+#close-inventory-button:hover,
+#close-scanner-button:hover {
+    transform: scale(1.1);
+    color: #ff6b6b;
+}
+
+/* Melhorias nos modais */
+.ui-screen {
+    transition: all 0.3s ease-out;
+}
+
+#inventory-content {
+    transition: all 0.3s ease-out;
+}
+
+#notification-content {
+    transition: all 0.3s ease-out;
+}
+
+/* Suporte para prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .animate-pulse,
+    .animate-glow {
+        animation: none !important;
+    }
+}
